@@ -1,0 +1,179 @@
+import React from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
+import {
+  LayoutDashboard, Package, Boxes, ShoppingCart, Users, Truck,
+  FileText, CreditCard, BarChart3, TrendingUp, Settings, HelpCircle, LogOut,
+  ChevronLeft, ChevronRight
+} from 'lucide-react'
+import { cn } from '@/shared/utils/utils'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/misc'
+import { Badge } from '@/shared/components/badge'
+import { useTranslation } from 'react-i18next'
+
+const navItems = [
+  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { label: 'Products', href: '/products', icon: Package },
+  { label: 'Inventory', href: '/inventory', icon: Boxes },
+  { label: 'Orders', href: '/orders', icon: ShoppingCart, badge: 5 },
+  { label: 'Customers', href: '/customers', icon: Users },
+  { label: 'Suppliers', href: '/suppliers', icon: Truck },
+  { label: 'Invoices', href: '/invoices', icon: FileText },
+  { label: 'Payments', href: '/payments', icon: CreditCard },
+  { label: 'Reports', href: '/reports', icon: BarChart3 },
+  { label: 'Analytics', href: '/analytics', icon: TrendingUp },
+]
+
+const bottomItems = [
+  { label: 'Settings', href: '/settings', icon: Settings },
+  { label: 'Help', href: '/help', icon: HelpCircle },
+]
+
+interface SidebarProps {
+  collapsed: boolean
+  onCollapse: (v: boolean) => void
+}
+
+export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
+  const location = useLocation()
+  const { t, i18n } = useTranslation()
+  const isRtl = i18n.language === 'ar'
+
+  return (
+    <aside
+      className={cn(
+        'relative flex flex-col h-full bg-[#fcfdfd] dark:bg-[#090f1d] border-r border-gray-100 dark:border-zinc-800/80 shadow-sm transition-all duration-300 ease-in-out',
+        collapsed ? 'w-16' : 'w-60'
+      )}
+    >
+      {/* Logo */}
+      <div className="flex h-20 items-center px-4 border-b border-gray-50 dark:border-zinc-800/40">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-main text-white">
+            <span className="text-xl font-black">D</span>
+          </div>
+          {!collapsed && (
+            <span className="text-xl font-bold text-[#111827] dark:text-gray-100 tracking-tight">Donezo</span>
+          )}
+        </div>
+      </div>
+
+      {/* Collapse toggle */}
+      <button
+        onClick={() => onCollapse(!collapsed)}
+        className={cn(
+          'absolute top-16 z-10 flex h-6 w-6 items-center justify-center rounded-full',
+          isRtl ? '-left-3' : '-right-3',
+          'border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-md hover:bg-gray-50 dark:hover:bg-zinc-750 transition-colors'
+        )}
+        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {collapsed ? (
+          isRtl ? <ChevronLeft className="h-3 w-3 text-gray-500 dark:text-gray-400" /> : <ChevronRight className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+        ) : (
+          isRtl ? <ChevronRight className="h-3 w-3 text-gray-500 dark:text-gray-400" /> : <ChevronLeft className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+        )}
+      </button>
+
+      {/* Nav items */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3">
+        {!collapsed && (
+          <p className="px-5 mb-2 text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">
+            {t('menu')}
+          </p>
+        )}
+        <ul className="space-y-1 px-2">
+          {navItems.map((item) => (
+            <NavItem key={item.href} item={item} collapsed={collapsed} />
+          ))}
+        </ul>
+
+        {!collapsed && (
+          <p className="px-5 mt-6 mb-2 text-[11px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">
+            {t('system')}
+          </p>
+        )}
+        <ul className="space-y-1 px-2">
+          {bottomItems.map((item) => (
+            <NavItem key={item.href} item={item} collapsed={collapsed} />
+          ))}
+        </ul>
+      </nav>
+
+      {/* User section */}
+      {!collapsed && (
+        <div className="border-t border-gray-100 dark:border-zinc-800/80 p-3 bg-gray-50/50 dark:bg-zinc-800/10">
+          <div className="flex items-center gap-2.5 rounded-xl p-2 hover:bg-gray-100/50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-main/25 to-main/10 text-main text-sm font-bold border border-main/10 shadow-xs">
+              JD
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-gray-800 dark:text-gray-200">John Doe</p>
+              <p className="truncate text-[10px] text-gray-400 dark:text-zinc-500 font-semibold">Administrator</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </aside>
+  )
+}
+
+interface NavItemProps {
+  item: { label: string; href: string; icon: React.ElementType; badge?: number }
+  collapsed: boolean
+}
+
+function NavItem({ item, collapsed }: NavItemProps) {
+  const Icon = item.icon
+  const { t, i18n } = useTranslation()
+  const isRtl = i18n.language === 'ar'
+  const translatedLabel = t(item.label.toLowerCase())
+
+  const navLink = (
+    <NavLink
+      to={item.href}
+      end={item.href === '/'}
+      className={({ isActive }) =>
+        cn(
+          'group flex h-10 items-center gap-3.5 rounded-xl px-3.5 text-sm font-semibold transition-all duration-200 relative',
+          'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-zinc-100',
+          isActive && 'bg-main/10 dark:bg-main/20 text-main dark:text-main'
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <span className={cn(
+              "absolute top-2 bottom-2 w-1 rounded-full bg-main dark:bg-main",
+              isRtl ? "right-0 rounded-l-full" : "left-0 rounded-r-full"
+            )} />
+          )}
+          <Icon className={cn('h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-105', isActive ? 'text-main dark:text-main' : 'text-gray-400 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-zinc-300')} />
+          {!collapsed && (
+            <>
+              <span className="flex-1 truncate">{translatedLabel}</span>
+              {item.badge && (
+                <Badge className="h-5 min-w-5 px-1 text-[10px] bg-main dark:bg-main text-white font-bold rounded-lg border-none flex items-center justify-center">
+                  {item.badge}
+                </Badge>
+              )}
+            </>
+          )}
+        </>
+      )}
+    </NavLink>
+  )
+
+  if (collapsed) {
+    return (
+      <li>
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger asChild>{navLink}</TooltipTrigger>
+          <TooltipContent side={isRtl ? "left" : "right"} className="font-semibold text-xs dark:bg-zinc-800 dark:text-zinc-100">{translatedLabel}</TooltipContent>
+        </Tooltip>
+      </li>
+    )
+  }
+
+  return <li>{navLink}</li>
+}

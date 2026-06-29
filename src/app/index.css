@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 241 74% 69%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 241 74% 69%;
+    --radius: 0.625rem;
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 224 71.4% 4.1%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-accent: 221 83% 97%;
+    --sidebar-accent-foreground: 221 83% 40%;
+    --sidebar-ring: 221 83% 53%;
+    --chart-1: 221 83% 53%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --main-color: #7977e9;
+    --main-gradient: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+    --gradient-start: #5233D3;
+    --gradient-end: #08BCA6;
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 20% 98%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 20% 98%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 241 85% 75%;
+    --primary-foreground: 222 47% 7%;
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 217 32% 15%;
+    --muted-foreground: 215 20% 55%;
+    --accent: 217 32% 17%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 241 85% 75%;
+    --sidebar: 222 47% 6%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-border: 217 32% 17%;
+    --sidebar-accent: 217 32% 14%;
+    --sidebar-accent-foreground: 217 91% 70%;
+    --sidebar-ring: 217 91% 60%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground/40; }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-sm border border-border/60 shadow-sm;
+  }
+  .gradient-primary {
+    @apply bg-gradient-to-br from-primary to-primary/80;
+  }
+  .animate-in {
+    animation: fade-in 0.25s ease-out;
+  }
+}
+
