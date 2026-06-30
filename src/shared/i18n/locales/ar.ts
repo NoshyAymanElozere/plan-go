@@ -63,5 +63,12 @@ export const ar = {
   save: "حفظ",
   delete: "حذف",
   edit: "تعديل",
-  saveChanges: "حفظ التغييرات"
+  saveChanges: "حفظ التغييرات",
+  email: "البريد الإلكتروني",
+  password: "كلمة المرور",
+  login: "تسجيل الدخول",
+  loginTitle: "قم بتسجيل الدخول للمتابعة",
+  emailRequired: "البريد الإلكتروني مطلوب",
+  passwordRequired: "كلمة المرور مطلوبة",
+  invalidEmail: "البريد الإلكتروني غير صالح",
 }

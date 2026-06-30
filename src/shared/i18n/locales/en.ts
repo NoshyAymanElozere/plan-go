@@ -63,5 +63,12 @@ export const en = {
   save: "Save",
   delete: "Delete",
   edit: "Edit",
-  saveChanges: "Save Changes"
+  saveChanges: "Save Changes",
+  email: "Email",
+  password: "Password",
+  login: "Login",
+  loginTitle: "Log in to continue",
+  emailRequired: "Email is required",
+  passwordRequired: "Password is required",
+  invalidEmail: "Invalid email address",
 }

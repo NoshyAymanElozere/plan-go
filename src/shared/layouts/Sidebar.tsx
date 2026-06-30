@@ -1,14 +1,27 @@
-import React from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
-import {
-  LayoutDashboard, Package, Boxes, ShoppingCart, Users, Truck,
-  FileText, CreditCard, BarChart3, TrendingUp, Settings, HelpCircle, LogOut,
-  ChevronLeft, ChevronRight
-} from 'lucide-react'
-import { cn } from '@/shared/utils/utils'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/misc'
 import { Badge } from '@/shared/components/badge'
+import { BaseDropdown } from '@/shared/components/BaseDropdown'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/misc'
+import { cn } from '@/shared/utils/utils'
+import {
+  BarChart3,
+  Boxes,
+  ChevronDown,
+  ChevronLeft, ChevronRight,
+  ChevronUp,
+  CreditCard,
+  FileText,
+  HelpCircle,
+  LayoutDashboard, Package,
+  Settings,
+  ShoppingCart,
+  TrendingUp,
+  Truck,
+  Users
+} from 'lucide-react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { NavLink, useLocation } from 'react-router-dom'
+import { settingLinks } from './SidebarLinks'
 
 const navItems = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -24,9 +37,9 @@ const navItems = [
 ]
 
 const bottomItems = [
-  { label: 'Settings', href: '/settings', icon: Settings },
   { label: 'Help', href: '/help', icon: HelpCircle },
 ]
+
 
 interface SidebarProps {
   collapsed: boolean
@@ -37,6 +50,9 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
   const location = useLocation()
   const { t, i18n } = useTranslation()
   const isRtl = i18n.language === 'ar'
+  const isSettingsPage = location.pathname.startsWith('/settings')
+  const segments = location.pathname.split('/')
+  const activeSubRoute = segments[2] || 'countries'
 
   return (
     <aside
@@ -93,6 +109,30 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
           </p>
         )}
         <ul className="space-y-1 px-2">
+          <BaseDropdown
+            collapsed={collapsed}
+            title={t('settings')}
+            side={isRtl ? "left" : "right"}
+            className="max-h-[300px] overflow-y-auto w-48"
+          >
+            {settingLinks.map((tab) => {
+              const isActive = isSettingsPage && activeSubRoute === tab.value
+              return (
+                <NavLink
+                  key={tab.value}
+                  to={`/settings/${tab.value}`}
+                  className={cn(
+                    collapsed ? 'w-full text-xs font-semibold' : 'flex h-8 items-center rounded-lg px-3 text-xs font-semibold transition-all duration-200',
+                    isActive
+                      ? 'bg-main/10 text-main dark:text-main font-bold'
+                      : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-955 dark:hover:text-zinc-100'
+                  )}
+                >
+                  {t(tab.label)}
+                </NavLink>
+              )
+            })}
+          </BaseDropdown>
           {bottomItems.map((item) => (
             <NavItem key={item.href} item={item} collapsed={collapsed} />
           ))}
@@ -176,4 +216,7 @@ function NavItem({ item, collapsed }: NavItemProps) {
   }
 
   return <li>{navLink}</li>
+
 }
+
+

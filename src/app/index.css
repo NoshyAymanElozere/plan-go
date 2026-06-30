@@ -81,26 +81,75 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { @apply bg-transparent; }
-  ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground/40; }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
+  }
 }
 
 @layer utilities {
   .glass-card {
     @apply bg-card/80 backdrop-blur-sm border border-border/60 shadow-sm;
   }
+
   .gradient-primary {
     @apply bg-gradient-to-br from-primary to-primary/80;
   }
+
   .animate-in {
     animation: fade-in 0.25s ease-out;
   }
 }
 
+
+
+@keyframes dialog-show {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes dialog-hide {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+.animate-dialog-show {
+  animation: dialog-show 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-dialog-hide {
+  animation: dialog-hide 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

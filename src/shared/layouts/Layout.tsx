@@ -5,11 +5,13 @@ import { Header } from './Header'
 import { TooltipProvider } from '@/shared/components/misc'
 import { cn } from '@/shared/utils/utils'
 import { useTranslation } from 'react-i18next'
+import { useTheme } from '@/shared/hooks/useTheme'
 
 export function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { i18n } = useTranslation()
+  useTheme() // Invoked to sync the html class and data-attributes on mount/update
 
   useEffect(() => {
     const dir = i18n.language === 'ar' ? 'rtl' : 'ltr'

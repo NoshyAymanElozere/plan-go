@@ -1,5 +1,6 @@
 import axios from 'axios'
 import toast from 'react-hot-toast'
+import { getCookie, eraseCookie } from '@/shared/utils/cookies'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'https://api.example.com/v1',
@@ -9,13 +10,15 @@ const api = axios.create({
   },
 })
 
-// Request interceptor — attach auth token
+// Request interceptor — attach auth token and lang headers
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('erp_token')
+    const token = getCookie('plan-go-token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    config.headers['Accept'] = 'application/json'
+    config.headers['Accept-Language'] = localStorage.getItem('lang') || 'en'
     return config
   },
   (error) => Promise.reject(error)
@@ -30,8 +33,10 @@ api.interceptors.response.use(
       error?.response?.data?.message ?? error?.message ?? 'Something went wrong'
 
     if (status === 401) {
-      localStorage.removeItem('erp_token')
-      toast.error('Session expired. Please log in again.')
+      eraseCookie('plan-go-token')
+      if (error?.config?.url && !error.config.url.includes('/admin/login')) {
+        toast.error('Session expired. Please log in again.')
+      }
     } else if (status === 403) {
       toast.error('You do not have permission to perform this action.')
     } else if (status >= 500) {

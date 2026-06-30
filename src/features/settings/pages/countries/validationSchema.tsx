@@ -1,0 +1,26 @@
+import { z } from 'zod'
+
+export const schema = z.object({
+  nameAr: z.string().min(1, 'Arabic name is required'),
+  nameEn: z.string().min(1, 'English name is required'),
+  code: z.string().min(1, 'Country code is required'),
+  is_active: z.boolean(),
+  image: z.any().optional()
+})
+
+export type CountriesFormValues = z.infer<typeof schema>
+
+export const getInitialValues = (editingItem: any | null) => {
+  if (!editingItem) {
+    return { nameAr: '', nameEn: '', code: '', is_active: true, image: null }
+  }
+  const nameAr = editingItem.translations?.find((t: any) => t.language_id === 2)?.name || ''
+  const nameEn = editingItem.translations?.find((t: any) => t.language_id === 1)?.name || editingItem.name || ''
+  return {
+    nameAr,
+    nameEn,
+    code: editingItem.code || '',
+    is_active: editingItem.is_active ?? true,
+    image: null
+  }
+}
