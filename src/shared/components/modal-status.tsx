@@ -65,7 +65,7 @@ export function ModalStatus({
                   disabled={loading}
                   className="flex-1 h-11 items-center justify-center rounded-xl bg-rose-500 px-4 text-xs font-bold text-white hover:bg-rose-600 transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
                 >
-                  {loading ? 'Processing…' : agreeLabel}
+                  {loading ? (typeof document !== 'undefined' && document.documentElement.dir === 'rtl' ? 'جاري المعالجة...' : 'Processing...') : agreeLabel}
                 </button>
               )}
             </div>
@@ -74,6 +74,8 @@ export function ModalStatus({
       </Dialog>
     )
   }
+
+  const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,7 +110,7 @@ export function ModalStatus({
               disabled={loading}
               className="inline-flex h-10 items-center justify-center rounded-xl bg-main px-4 text-sm font-semibold text-white hover:opacity-90 transition-colors disabled:opacity-50"
             >
-              {loading ? 'Processing…' : agreeLabel}
+              {loading ? (isRtl ? 'جاري المعالجة...' : 'Processing...') : agreeLabel}
             </button>
           )}
         </DialogFooter>

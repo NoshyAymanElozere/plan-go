@@ -26,7 +26,7 @@ export function getCountriesColumnDefs({
             valueGetter: (params) => {
                 return params.data?.translations?.find((trans: any) => trans.language_id === 2)?.name || ''
             },
-            filter: 'agTextColumnFilter',
+           filter:false,
             flex: 1
         },
         {
@@ -34,19 +34,19 @@ export function getCountriesColumnDefs({
             valueGetter: (params) => {
                 return params.data?.translations?.find((trans: any) => trans.language_id === 1)?.name || params.data?.name || ''
             },
-            filter: 'agTextColumnFilter',
+           filter:false,
             flex: 1
         },
         {
             headerName: t('code') || 'Code',
             field: 'code',
-            filter: 'agTextColumnFilter',
+           filter:false,
             width: 100
         },
         {
             headerName: t('phoneCode') || 'Phone Code',
             field: 'phone_code',
-            filter: 'agTextColumnFilter',
+           filter:false,
             width: 120
         },
         {

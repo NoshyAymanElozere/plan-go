@@ -2,7 +2,8 @@ import React from 'react'
 import { AgGridReact, type AgGridReactProps } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community'
 import { useTranslation } from 'react-i18next'
-import { SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react'
+import { cn } from '@/shared/utils/utils'
 
 // Register all community features
 ModuleRegistry.registerModules([AllCommunityModule])
@@ -80,6 +81,11 @@ interface GenericDataGridProps<TData = any> extends AgGridReactProps<TData> {
   loading?: boolean
   height?: string | number
   onViewRow?: (data: TData) => void
+  isServerSide?: boolean
+  currentPage?: number
+  totalPages?: number
+  onPageChange?: (page: number) => void
+  paginationLinks?: Array<{ url: string | null; label: string; active: boolean }>
 }
 
 export function GenericDataGrid<TData = any>({
@@ -88,6 +94,11 @@ export function GenericDataGrid<TData = any>({
   loading = false,
   height = 600,
   onViewRow,
+  isServerSide = false,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange,
+  paginationLinks,
   ...props
 }: GenericDataGridProps<TData>) {
   const { i18n } = useTranslation()
@@ -196,7 +207,7 @@ export function GenericDataGrid<TData = any>({
           enableRtl={isRtl}
           loading={loading}
           loadingOverlayComponent={CustomLoadingOverlay}
-          pagination={props.pagination ?? true}
+          pagination={isServerSide ? false : (props.pagination ?? true)}
           paginationPageSize={props.paginationPageSize ?? 10}
           paginationPageSizeSelector={props.paginationPageSizeSelector ?? [10, 20, 50, 100]}
           onGridReady={onGridReady}
@@ -211,6 +222,87 @@ export function GenericDataGrid<TData = any>({
           {...props}
         />
       </div>
+
+      {isServerSide && (
+        <div className="flex items-center justify-between px-4 py-3 bg-card border border-border/60 rounded-2xl mt-2" dir={isRtl ? 'rtl' : 'ltr'}>
+          <div className="text-xs font-bold text-muted-foreground">
+            {isRtl ? `الصفحة ${currentPage} من ${totalPages}` : `Page ${currentPage} of ${totalPages}`}
+          </div>
+          <div className="flex items-center gap-1.5">
+            {paginationLinks && paginationLinks.length > 0 ? (
+              paginationLinks.map((link, idx) => {
+                const isPrev = link.label.includes('Previous') || link.label.includes('&laquo;')
+                const isNext = link.label.includes('Next') || link.label.includes('&raquo;')
+
+                let cleanLabel = link.label
+                  .replace('&laquo; ', '')
+                  .replace(' &raquo;', '')
+                  .replace('Previous', '')
+                  .replace('Next', '')
+
+                const pageMatch = link.url ? link.url.match(/page=(\d+)/) : null
+                const pageNum = pageMatch ? parseInt(pageMatch[1], 10) : null
+
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => pageNum && onPageChange?.(pageNum)}
+                    disabled={!link.url}
+                    className={cn(
+                      "h-8 min-w-8 px-2 flex items-center justify-center rounded-lg border text-xs font-bold transition-all duration-200 disabled:opacity-50",
+                      link.active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border/60 text-foreground hover:bg-primary/5 hover:border-primary/30"
+                    )}
+                  >
+                    {isPrev ? (
+                      isRtl ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />
+                    ) : isNext ? (
+                      isRtl ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
+                    ) : (
+                      cleanLabel
+                    )}
+                  </button>
+                )
+              })
+            ) : (
+              <>
+                <button
+                  onClick={() => onPageChange?.(Math.max((currentPage || 1) - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="h-8 w-8 flex items-center justify-center rounded-lg border border-border/60 text-foreground hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 disabled:opacity-50"
+                >
+                  {isRtl ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+                </button>
+                {Array.from({ length: Number(totalPages) || 1 }).map((_, idx) => {
+                  const pageNum = idx + 1
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => onPageChange?.(pageNum)}
+                      className={cn(
+                        "h-8 min-w-8 px-2 flex items-center justify-center rounded-lg border text-xs font-bold transition-all duration-200",
+                        currentPage === pageNum
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-border/60 text-foreground hover:bg-primary/5 hover:border-primary/30"
+                      )}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+                <button
+                  onClick={() => onPageChange?.(Math.min((currentPage || 1) + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="h-8 w-8 flex items-center justify-center rounded-lg border border-border/60 text-foreground hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 disabled:opacity-50"
+                >
+                  {isRtl ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

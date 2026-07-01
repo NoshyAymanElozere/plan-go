@@ -23,6 +23,8 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, useLocation } from 'react-router-dom'
 import { settingLinks } from './SidebarLinks'
 
+import { useProfile } from '@/features/auth/api/useAuth'
+
 const navItems = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
   { label: 'Products', href: '/products', icon: Package },
@@ -54,10 +56,19 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
   const segments = location.pathname.split('/')
   const activeSubRoute = segments[2] || 'countries'
 
+  const { data: admin } = useProfile()
+  const adminName = admin?.name || 'Admin User'
+  const initials = adminName
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase()
+
   return (
     <aside
       className={cn(
-        'relative flex flex-col h-full bg-[#fcfdfd] dark:bg-[#090f1d] border-r border-gray-100 dark:border-zinc-800/80 shadow-sm transition-all duration-300 ease-in-out',
+        'relative flex flex-col h-full bg-[#F9F9FA] dark:bg-[#090f1d] border-r border-gray-100 dark:border-zinc-800/80 shadow-sm transition-all duration-300 ease-in-out',
         collapsed ? 'w-16' : 'w-60'
       )}
     >
@@ -69,8 +80,8 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
           <div className="flex items-center gap-0.5 text-2xl font-black select-none animate-fade-in" dir="ltr">
             <span className="text-[#00D1C1]">Plan</span>
             <span className="text-[#7266F0] flex items-baseline">
-              G
-              <span className="text-[11px] leading-none font-bold align-super ml-0.5 relative -top-2.5">o</span>
+              Go
+              <span className="h-1.5 w-1.5 rounded-full bg-[#00D1C1] ml-0.5" />
             </span>
           </div>
         )}
@@ -143,19 +154,19 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
       </nav>
 
       {/* User section */}
-      {!collapsed && (
-        <div className="border-t border-gray-100 dark:border-zinc-800/80 p-3 bg-gray-50/50 dark:bg-zinc-800/10">
-          <div className="flex items-center gap-2.5 rounded-xl p-2 hover:bg-gray-100/50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-main/25 to-main/10 text-main text-sm font-bold border border-main/10 shadow-xs">
-              JD
-            </div>
+      <div className="border-t border-gray-100 dark:border-zinc-800/80 p-3 bg-gray-50/50 dark:bg-zinc-800/10">
+        <div className="flex items-center gap-2.5 rounded-xl p-2 hover:bg-gray-100/50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-main/25 to-main/10 text-main text-sm font-bold border border-main/10 shadow-xs">
+            {initials}
+          </div>
+          {!collapsed && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-gray-800 dark:text-gray-200">John Doe</p>
+              <p className="truncate text-xs font-semibold text-gray-800 dark:text-gray-200">{adminName}</p>
               <p className="truncate text-[10px] text-gray-400 dark:text-zinc-500 font-semibold">Administrator</p>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </aside>
   )
 }

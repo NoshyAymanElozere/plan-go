@@ -75,6 +75,11 @@ export default function SupportPage() {
           onViewRow={(data) => {
             setViewingItem(data)
           }}
+          isServerSide
+          currentPage={page}
+          totalPages={paginatedData?.meta?.last_page || paginatedData?.last_page || 1}
+          onPageChange={setPage}
+          paginationLinks={paginatedData?.meta?.links || paginatedData?.links}
         />
       </CardContent>
 

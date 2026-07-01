@@ -112,6 +112,11 @@ export default function FacilitiesPage() {
               setIsViewOnly(true)
               setIsModalOpen(true)
             }}
+            isServerSide
+            currentPage={page}
+            totalPages={paginatedData?.meta?.last_page || paginatedData?.last_page || 1}
+            onPageChange={setPage}
+            paginationLinks={paginatedData?.meta?.links || paginatedData?.links}
           />
         </CardContent>
 

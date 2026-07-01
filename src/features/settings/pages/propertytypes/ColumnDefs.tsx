@@ -40,7 +40,7 @@ export function getPropertyTypesColumnDefs({
     {
       headerName: t('status') || 'Status',
       field: 'is_active',
-      filter: 'agSetColumnFilter',
+      filter: false,
       filterParams: {
         valueFormatter: (params: any) => (params.value ? t('active') || 'Active' : t('inactive') || 'Inactive')
       },

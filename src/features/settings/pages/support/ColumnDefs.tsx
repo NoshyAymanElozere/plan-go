@@ -17,25 +17,25 @@ export function getSupportColumnDefs({
     {
       headerName: t('arabicName') || 'Name',
       field: 'name',
-      filter: 'agTextColumnFilter',
+      filter:false,
       flex: 1
     },
     {
       headerName: t('email') || 'Email',
       field: 'email',
-      filter: 'agTextColumnFilter',
+      filter:false,
       flex: 1
     },
     {
       headerName: t('phoneCode') || 'Phone',
       field: 'phone',
-      filter: 'agTextColumnFilter',
+      filter:false,
       width: 140
     },
     {
       headerName: t('subject') || 'Subject',
       field: 'subject',
-      filter: 'agTextColumnFilter',
+      filter:false,
       flex: 1.5
     },
     {

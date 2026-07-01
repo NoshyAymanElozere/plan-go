@@ -26,7 +26,7 @@ export function getGroundServicesColumnDefs({
       valueGetter: (params) => {
         return params.data?.translations?.find((trans: any) => trans.language_id === 2)?.name || ''
       },
-      filter: 'agTextColumnFilter',
+      filter: false,
       flex: 1
     },
     {
@@ -34,7 +34,7 @@ export function getGroundServicesColumnDefs({
       valueGetter: (params) => {
         return params.data?.translations?.find((trans: any) => trans.language_id === 1)?.name || params.data?.name || ''
       },
-      filter: 'agTextColumnFilter',
+      filter: false,
       flex: 1
     },
     {
