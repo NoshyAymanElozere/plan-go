@@ -39,6 +39,7 @@ const DialogContent = React.forwardRef<
     xl: 'max-w-4xl',
     full: 'max-w-[95vw]',
   }
+  const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -67,9 +68,19 @@ const DialogContent = React.forwardRef<
 })
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
-const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-col gap-1.5 text-left', className)} {...props} />
-)
+const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
+  const isRtl = typeof document !== 'undefined' && document.documentElement.dir === 'rtl'
+  return (
+    <div
+      className={cn(
+        'flex flex-col gap-1.5',
+        isRtl ? 'text-right pr-8' : 'text-left pl-8',
+        className
+      )}
+      {...props}
+    />
+  )
+}
 DialogHeader.displayName = 'DialogHeader'
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

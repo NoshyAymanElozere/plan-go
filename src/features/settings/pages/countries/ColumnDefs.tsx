@@ -1,7 +1,7 @@
 import { Button } from '@/shared/components/button'
 import { StatusDropdown } from '@/shared/components/StatusDropdown'
 import { ColDef } from 'ag-grid-community'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Eye } from 'lucide-react'
 
 interface ColumnDefsProps {
     t: (key: string) => string
@@ -9,6 +9,7 @@ interface ColumnDefsProps {
     setEditingItem: (item: any) => void
     setIsModalOpen: (open: boolean) => void
     setDeletingItem: (item: any) => void
+    setIsViewOnly: (view: boolean) => void
 }
 
 export function getCountriesColumnDefs({
@@ -16,7 +17,8 @@ export function getCountriesColumnDefs({
     toggleMutation,
     setEditingItem,
     setIsModalOpen,
-    setDeletingItem
+    setDeletingItem,
+    setIsViewOnly
 }: ColumnDefsProps): ColDef[] {
     return [
         {
@@ -36,17 +38,23 @@ export function getCountriesColumnDefs({
             flex: 1
         },
         {
-            headerName: 'Code',
+            headerName: t('code') || 'Code',
             field: 'code',
             filter: 'agTextColumnFilter',
             width: 100
         },
         {
-            headerName: 'Status',
+            headerName: t('phoneCode') || 'Phone Code',
+            field: 'phone_code',
+            filter: 'agTextColumnFilter',
+            width: 120
+        },
+        {
+            headerName: t('status') || 'Status',
             field: 'is_active',
             filter: 'agSetColumnFilter',
             filterParams: {
-                valueFormatter: (params: any) => (params.value ? 'Active' : 'Inactive')
+                valueFormatter: (params: any) => (params.value ? t('active') || 'Active' : t('inactive') || 'Inactive')
             },
             width: 150,
             cellRenderer: (params: any) => {
@@ -62,37 +70,50 @@ export function getCountriesColumnDefs({
             }
         },
         {
-            headerName: 'Flag Image',
+            headerName: t('flagImage') || 'Flag Image',
             field: 'image_url',
             filter: false,
             width: 130,
             cellRenderer: (params: any) => {
                 const item = params.data
-                if (!item || !item.image_url) return <span className="text-gray-300 text-xs">-</span>
+                const imageUrl = item?.image_url || item?.image?.file_path
+                if (!imageUrl) return <span className="text-gray-300 text-xs">-</span>
                 return (
                     <img
-                        src={item.image_url}
+                        src={imageUrl}
                         alt="flag"
-                        className="h-6 w-10 object-cover rounded border border-gray-100 mt-2"
+                        className="h-10 w-16 object-cover rounded border border-gray-100 mt-1"
                     />
                 )
             }
         },
         {
-            headerName: 'Actions',
+            headerName: t('actions') || 'Actions',
             filter: false,
-            width: 120,
-            cellClass: 'flex items-center justify-end h-full',
+            width: 150,
+            cellClass: 'flex items-center justify-start h-full',
             cellRenderer: (params: any) => {
                 const item = params.data
                 if (!item) return null
                 return (
-                    <div className="flex items-center justify-end gap-1.5">
+                    <div className="flex items-center justify-start gap-1.5">
                         <Button
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => {
                                 setEditingItem(item)
+                                setIsViewOnly(true)
+                                setIsModalOpen(true)
+                            }}
+                        >
+                            <Eye className="h-4 w-4 text-blue-500" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                                setEditingItem(item)
+                                setIsViewOnly(false)
                                 setIsModalOpen(true)
                             }}
                         >

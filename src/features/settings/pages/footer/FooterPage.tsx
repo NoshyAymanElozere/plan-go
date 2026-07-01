@@ -1,6 +1,6 @@
 import React from 'react'
 import { Save } from 'lucide-react'
-import { FormProvider } from 'react-hook-form'
+import { FormProvider, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { useZodForm } from '@/shared/components/form-fields'
@@ -8,34 +8,44 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ca
 import { Button } from '@/shared/components/button'
 import { BaseInputField } from '@/shared/components/base-input-field'
 import { TableSkeleton } from '@/shared/components/table'
-import { useSettingsSingle, useSaveSettingsSingle } from '../../api/useSettings'
+// @ts-ignore
+import { CKEditor } from '@ckeditor/ckeditor5-react'
+// @ts-ignore
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import { useSettings, useUpdateSettings } from '../../api/useSettings'
 
 const schema = z.object({
-  aboutAr: z.string().min(1, 'Arabic description is required'),
-  aboutEn: z.string().min(1, 'English description is required'),
-  copyrightAr: z.string().min(1, 'Arabic copyright is required'),
-  copyrightEn: z.string().min(1, 'English copyright is required'),
-  socialLinks: z.string().optional(),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(1, 'Phone is required')
-});
+  footer_text: z.string().min(1, 'Footer text is required'),
+  footer_number: z.string().min(1, 'Footer number is required')
+})
 
 export default function FooterPage() {
-  const { t } = useTranslation()
-  const { data: itemData, isLoading } = useSettingsSingle('footer')
-  const saveMutation = useSaveSettingsSingle('footer')
+  const { t, i18n } = useTranslation()
+  const { data: settings, isLoading } = useSettings()
+  const saveMutation = useUpdateSettings()
 
-  const methods = useZodForm(schema, itemData || {})
+  const methods = useZodForm(schema, {
+    footer_text: '',
+    footer_number: ''
+  })
 
   React.useEffect(() => {
-    if (itemData) {
-      methods.reset(itemData)
+    if (settings) {
+      methods.reset({
+        footer_text: settings.footer_text || '',
+        footer_number: settings.footer_number || ''
+      })
     }
-  }, [itemData, methods.reset])
+  }, [settings, methods.reset])
 
   const onSubmit = (formData: any) => {
-    saveMutation.mutate(formData)
+    saveMutation.mutate({
+      footer_text: formData.footer_text,
+      footer_number: formData.footer_number
+    })
   }
+
+  const isRtl = i18n.language === 'ar'
 
   if (isLoading) {
     return (
@@ -52,20 +62,40 @@ export default function FooterPage() {
       </CardHeader>
       <CardContent className="p-6">
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-                          <BaseInputField name="aboutAr" label="Arabic About Description / نبذة بالعربية" required />
-                          <BaseInputField name="aboutEn" label="English About Description" required />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <BaseInputField name="copyrightAr" label="Arabic Copyright / حقوق النشر بالعربية" required />
-                          <BaseInputField name="copyrightEn" label="English Copyright text" required />
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          <BaseInputField name="socialLinks" label="Social Page URL" placeholder="https://..." />
-                          <BaseInputField name="email" label="Contact Email" required />
-                          <BaseInputField name="phone" label="Contact Phone" required />
-                        </div>
+          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-2 flex flex-col text-start" dir={isRtl ? 'rtl' : 'ltr'}>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+                {isRtl ? 'نص التذييل (Footer Text)' : 'Footer Text'} <span className="text-rose-500">*</span>
+              </label>
+              <Controller
+                name="footer_text"
+                control={methods.control}
+                render={({ field }) => (
+                  <div className="prose max-w-none text-start w-full">
+                    {/* @ts-ignore */}
+                    <CKEditor
+                      editor={ClassicEditor}
+                      config={{
+                        toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo']
+                      }}
+                      data={field.value || ''}
+                      onChange={(_, editor) => {
+                        field.onChange(editor.getData())
+                      }}
+                    />
+                  </div>
+                )}
+              />
+            </div>
+
+            <div className="max-w-md">
+              <BaseInputField
+                name="footer_number"
+                label={isRtl ? 'رقم الهاتف (Footer Number)' : 'Footer Number'}
+                required
+              />
+            </div>
+
             <div className="pt-4 border-t border-gray-50 flex justify-end">
               <Button type="submit" loading={saveMutation.isPending} className="px-6 h-10 rounded-xl">
                 <Save className="mr-2 h-4 w-4" /> {t('saveChanges') || 'Save Changes'}

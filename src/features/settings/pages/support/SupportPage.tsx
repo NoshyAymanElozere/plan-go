@@ -1,84 +1,107 @@
-import React from 'react'
-import { Save } from 'lucide-react'
-import { FormProvider } from 'react-hook-form'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { z } from 'zod'
-import { useZodForm } from '@/shared/components/form-fields'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/card'
-import { Button } from '@/shared/components/button'
-import { BaseInputField } from '@/shared/components/base-input-field'
-import { TableSkeleton } from '@/shared/components/table'
-import { useSettingsSingle, useSaveSettingsSingle } from '../../api/useSettings'
-
-const schema = z.object({
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(1, 'Phone is required'),
-  whatsapp: z.string().min(1, 'WhatsApp is required'),
-  socialLinks: z.string().optional(),
-  addressAr: z.string().min(1, 'Arabic address is required'),
-  addressEn: z.string().min(1, 'English address is required'),
-  workingHoursAr: z.string().min(1, 'Arabic working hours are required'),
-  workingHoursEn: z.string().min(1, 'English working hours are required')
-});
+import { SearchInput } from '@/shared/components/input'
+import ModalStatus from '@/shared/components/modal-status'
+import { GenericDataGrid } from '@/shared/components/GenericDataGrid'
+import {
+  useSupportMessagesList,
+  useDeleteSupportMessage
+} from '../../api/useSupport'
+import { getSupportColumnDefs } from './ColumnDefs'
+import { SupportViewModal } from './SupportViewModal'
 
 export default function SupportPage() {
-  const { t } = useTranslation()
-  const { data: itemData, isLoading } = useSettingsSingle('support')
-  const saveMutation = useSaveSettingsSingle('support')
+  const { t, i18n } = useTranslation()
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [statusFilter, setStatusFilter] = useState('')
+  const label = t('supportMessages') || 'Support Messages'
+  const isRtl = i18n.language === 'ar'
 
-  const methods = useZodForm(schema, itemData || {})
+  const [viewingItem, setViewingItem] = useState<any | null>(null)
+  const [deletingItem, setDeletingItem] = useState<any | null>(null)
 
-  React.useEffect(() => {
-    if (itemData) {
-      methods.reset(itemData)
-    }
-  }, [itemData, methods.reset])
+  const { data: paginatedData, isLoading } = useSupportMessagesList(page, search, statusFilter)
+  const items = paginatedData?.data || []
 
-  const onSubmit = (formData: any) => {
-    saveMutation.mutate(formData)
-  }
+  const deleteMutation = useDeleteSupportMessage()
 
-  if (isLoading) {
-    return (
-      <Card className="border-border/60 shadow-sm rounded-2xl p-6 bg-white">
-        <TableSkeleton rows={4} cols={1} />
-      </Card>
-    )
-  }
+  const columnDefs = getSupportColumnDefs({
+    t,
+    setViewingItem,
+    setDeletingItem
+  })
 
   return (
-    <Card className="border-border/60 shadow-sm rounded-2xl overflow-hidden bg-white">
-      <CardHeader className="border-b border-gray-50 px-6 py-5">
-        <CardTitle className="text-lg font-bold text-gray-800">{t('support') || 'Support'}</CardTitle>
+    <Card className="border-border/60 shadow-sm rounded-2xl overflow-hidden bg-card">
+      <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-border/40 px-6 py-5">
+        <CardTitle className="text-lg font-bold text-foreground">{label}</CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-                          <BaseInputField name="email" label="Support Email" required />
-                          <BaseInputField name="phone" label="Support Phone" required />
-                          <BaseInputField name="whatsapp" label="WhatsApp Number" required />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <BaseInputField name="socialLinks" label="Social Page / Website Links" placeholder="https://..." />
-                          <div />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <BaseInputField name="addressAr" label="Arabic Address / العنوان بالعربية" required />
-                          <BaseInputField name="addressEn" label="English Address" required />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <BaseInputField name="workingHoursAr" label="Arabic Working Hours / ساعات العمل بالعربية" required />
-                          <BaseInputField name="workingHoursEn" label="English Working Hours" required />
-                        </div>
-            <div className="pt-4 border-t border-gray-50 flex justify-end">
-              <Button type="submit" loading={saveMutation.isPending} className="px-6 h-10 rounded-xl">
-                <Save className="mr-2 h-4 w-4" /> {t('saveChanges') || 'Save Changes'}
-              </Button>
-            </div>
-          </form>
-        </FormProvider>
+      <CardContent className="p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl" dir={isRtl ? 'rtl' : 'ltr'}>
+          <div className="flex-1">
+            <SearchInput
+              placeholder={`${t('search') || 'Search'} ${label}...`}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
+            />
+          </div>
+          <div className="w-full sm:w-44">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value)
+                setPage(1)
+              }}
+              className="w-full h-10 px-3 rounded-xl border border-border/60 bg-card text-xs font-bold text-foreground outline-none focus:border-primary/50 transition-colors"
+            >
+              <option value="">{isRtl ? 'جميع الحالات' : 'All Statuses'}</option>
+              <option value="unread">{t('unread') || 'Unread'}</option>
+              <option value="read">{t('read') || 'Read'}</option>
+            </select>
+          </div>
+        </div>
+
+        <GenericDataGrid
+          rowData={items}
+          columnDefs={columnDefs}
+          rowHeight={50}
+          headerHeight={50}
+          loading={isLoading}
+          onViewRow={(data) => {
+            setViewingItem(data)
+          }}
+        />
       </CardContent>
+
+      <SupportViewModal
+        open={!!viewingItem}
+        onOpenChange={(open) => !open && setViewingItem(null)}
+        messageId={viewingItem?.id || null}
+      />
+
+      <ModalStatus
+        open={!!deletingItem}
+        onOpenChange={(v) => !v && setDeletingItem(null)}
+        title={`${t('delete') || 'Delete'} ${label}`}
+        description={t('deleteConfirmation') || "Are you sure you want to delete this item? This action cannot be undone."}
+        agreeLabel={t('delete') || 'Delete'}
+        cancelLabel={t('cancel') || 'Cancel'}
+        onAgreeButtonClick={() => {
+          if (deletingItem) {
+            deleteMutation.mutate(deletingItem.id, {
+              onSuccess: () => setDeletingItem(null)
+            })
+          }
+        }}
+        onCancelButtonClick={() => setDeletingItem(null)}
+        loading={deleteMutation.isPending}
+        type="delete"
+      />
     </Card>
   )
 }

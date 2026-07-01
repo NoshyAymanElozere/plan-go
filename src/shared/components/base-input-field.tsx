@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Eye, EyeOff, Calendar, Clock } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/shared/utils/utils'
 
 export interface BaseInputFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
@@ -14,6 +15,7 @@ export const BaseInputField = React.forwardRef<HTMLInputElement, BaseInputFieldP
   ({ label, name, type = 'text', placeholder, className, customError, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false)
     const localRef = React.useRef<HTMLInputElement>(null)
+    const { t } = useTranslation()
 
     // Attempt to retrieve react-hook-form context
     const formContext = useFormContext()
@@ -21,7 +23,8 @@ export const BaseInputField = React.forwardRef<HTMLInputElement, BaseInputFieldP
     // Register if form context exists, otherwise fallback to empty props
     const registerProps = formContext ? formContext.register(name) : {}
     const formErrors = formContext ? formContext.formState.errors : {}
-    const error = customError || (formErrors[name]?.message as string | undefined)
+    const rawError = customError || (formErrors[name]?.message as string | undefined)
+    const error = rawError ? t(rawError) : undefined
 
     // Combine forwarded ref and local ref
     React.useImperativeHandle(ref, () => localRef.current as HTMLInputElement)

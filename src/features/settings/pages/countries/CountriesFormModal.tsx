@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
-import { ControlledCheckbox } from '@/shared/components/form-fields'
+import { useFormContext, Controller } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { BaseInputField } from '@/shared/components/base-input-field'
 import ModalStatus from '@/shared/components/modal-status'
+import { StatusDropdown } from '@/shared/components/StatusDropdown'
+import { ImageUpload } from '@/shared/components/image-upload'
 import { getInitialValues } from './validationSchema'
 
 interface CountriesFormModalProps {
@@ -12,6 +14,7 @@ interface CountriesFormModalProps {
   onSave: (data: any) => void
   loading: boolean
   label: string
+  isViewOnly?: boolean
 }
 
 export function CountriesFormModal({
@@ -20,9 +23,11 @@ export function CountriesFormModal({
   editingItem,
   onSave,
   loading,
-  label
+  label,
+  isViewOnly = false
 }: CountriesFormModalProps) {
   const { control, register, reset, handleSubmit } = useFormContext()
+  const { t, i18n } = useTranslation()
 
   useEffect(() => {
     if (open) {
@@ -30,38 +35,57 @@ export function CountriesFormModal({
     }
   }, [editingItem, open, reset])
 
+  const imageUrl = editingItem?.image_url || editingItem?.image?.file_path
+  const isRtl = i18n.language === 'ar'
+
   return (
     <ModalStatus
       open={open}
       onOpenChange={onOpenChange}
-      title={editingItem ? `Edit ${label}` : `Add New ${label}`}
-      agreeLabel="Save"
-      cancelLabel="Cancel"
-      onAgreeButtonClick={handleSubmit(onSave)}
+      title={isViewOnly ? `${t('view')} ${label}` : editingItem ? `${t('edit')} ${label}` : `${t('add')} ${label}`}
+      agreeLabel={isViewOnly ? undefined : t('save') || "Save"}
+      cancelLabel={isViewOnly ? t('close') || "Close" : t('cancel') || "Cancel"}
+      onAgreeButtonClick={isViewOnly ? undefined : handleSubmit(onSave)}
       onCancelButtonClick={() => onOpenChange(false)}
       loading={loading}
+      size="lg"
     >
-      <div className="space-y-4 text-right" dir="rtl">
+      <div className="space-y-4" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="grid grid-cols-2 gap-4">
-          <BaseInputField name="nameAr" label="Arabic Name / الاسم بالعربية" required />
-          <BaseInputField name="nameEn" label="English Name / الاسم بالإنجليزية" required />
+          <BaseInputField name="nameAr" label={t('arabicName') || 'Arabic Name'} required disabled={isViewOnly} />
+          <BaseInputField name="nameEn" label={t('englishName') || 'English Name'} required disabled={isViewOnly} />
         </div>
-        <div className="grid grid-cols-2 gap-4 items-center">
-          <BaseInputField name="code" label="Country Code / رمز الدولة (e.g. EG)" required />
-          <div className="pt-5 flex items-center justify-start">
-            <ControlledCheckbox name="is_active" control={control} label="Active / نشط" />
+        <div className="grid grid-cols-2 gap-4">
+          <BaseInputField name="code" label={t('countryCode') || 'Country Code'} required disabled={isViewOnly} />
+          <BaseInputField name="phone_code" label={t('phoneCode') || 'Phone Code'} required disabled={isViewOnly} />
+        </div>
+        <div className="grid grid-cols-2 gap-4 items-start">
+          <div className="flex flex-col gap-1.5 justify-center items-start">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+              {t('status') || 'Status'}
+            </label>
+            <Controller
+              name="is_active"
+              control={control}
+              render={({ field }) => (
+                <StatusDropdown
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isViewOnly}
+                  usePortal={false}
+                />
+              )}
+            />
           </div>
-        </div>
-        <div className="text-right">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
-            Flag Image / صورة العلم
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            {...register('image')}
-            className="w-full text-sm text-gray-500 file:ml-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-          />
+          <div>
+            <ImageUpload
+              name="image"
+              label={t('flagImage') || 'Flag Image'}
+              disabled={isViewOnly}
+              currentImageUrl={imageUrl}
+              aspectRatio="h-32 w-full"
+            />
+          </div>
         </div>
       </div>
     </ModalStatus>

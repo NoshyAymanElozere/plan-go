@@ -79,14 +79,15 @@ const CustomLoadingOverlay = () => {
 interface GenericDataGridProps<TData = any> extends AgGridReactProps<TData> {
   loading?: boolean
   height?: string | number
+  onViewRow?: (data: TData) => void
 }
 
 export function GenericDataGrid<TData = any>({
-  
   rowData,
   columnDefs,
   loading = false,
   height = 600,
+  onViewRow,
   ...props
 }: GenericDataGridProps<TData>) {
   const { i18n } = useTranslation()
@@ -199,6 +200,14 @@ export function GenericDataGrid<TData = any>({
           paginationPageSize={props.paginationPageSize ?? 10}
           paginationPageSizeSelector={props.paginationPageSizeSelector ?? [10, 20, 50, 100]}
           onGridReady={onGridReady}
+          onRowDoubleClicked={(event) => {
+            if (onViewRow && event.data) {
+              onViewRow(event.data)
+            }
+            if (props.onRowDoubleClicked) {
+              props.onRowDoubleClicked(event)
+            }
+          }}
           {...props}
         />
       </div>

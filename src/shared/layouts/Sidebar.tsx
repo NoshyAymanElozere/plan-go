@@ -62,15 +62,18 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
       )}
     >
       {/* Logo */}
-      <div className="flex h-20 items-center px-4 border-b border-gray-50 dark:border-zinc-800/40">
-        <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-main text-white">
-            <span className="text-xl font-black">D</span>
+      <div className="flex h-20 items-center justify-center border-b border-gray-50 dark:border-zinc-800/40">
+        {collapsed ? (
+          <img src="/favicon.svg" alt="Logo" className="h-9 w-9 shrink-0 object-contain animate-fade-in" />
+        ) : (
+          <div className="flex items-center gap-0.5 text-2xl font-black select-none animate-fade-in" dir="ltr">
+            <span className="text-[#00D1C1]">Plan</span>
+            <span className="text-[#7266F0] flex items-baseline">
+              G
+              <span className="text-[11px] leading-none font-bold align-super ml-0.5 relative -top-2.5">o</span>
+            </span>
           </div>
-          {!collapsed && (
-            <span className="text-xl font-bold text-[#111827] dark:text-gray-100 tracking-tight">Donezo</span>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Collapse toggle */}

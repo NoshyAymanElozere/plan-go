@@ -71,7 +71,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
               />
             </svg>
-            Loading…
+            <span className="sr-only">Loading...</span>
+            {typeof document !== 'undefined' && document.documentElement.dir === 'rtl' ? 'جاري التحميل...' : 'Loading...'}
           </>
         ) : (
           children

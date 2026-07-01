@@ -1,18 +1,12 @@
-import React from 'react'
-import { FormProvider } from 'react-hook-form'
-import { z } from 'zod'
+import React, { useEffect } from 'react'
+import { useFormContext, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { useZodForm, ControlledSelect, ControlledCheckbox } from '@/shared/components/form-fields'
+import { ControlledSelect } from '@/shared/components/form-fields'
 import { BaseInputField } from '@/shared/components/base-input-field'
 import ModalStatus from '@/shared/components/modal-status'
+import { StatusDropdown } from '@/shared/components/StatusDropdown'
 import { useAllCountries } from '../../api/useCountries'
-
-export const schema = z.object({
-  nameAr: z.string().min(1, 'Arabic name is required'),
-  nameEn: z.string().min(1, 'English name is required'),
-  country_id: z.string().min(1, 'Country is required'),
-  is_active: z.boolean()
-})
+import { getInitialValues } from './validationSchema'
 
 interface CitiesFormModalProps {
   open: boolean
@@ -21,6 +15,7 @@ interface CitiesFormModalProps {
   onSave: (data: any) => void
   loading: boolean
   label: string
+  isViewOnly?: boolean
 }
 
 export function CitiesFormModal({
@@ -29,9 +24,11 @@ export function CitiesFormModal({
   editingItem,
   onSave,
   loading,
-  label
+  label,
+  isViewOnly = false
 }: CitiesFormModalProps) {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const { control, reset, handleSubmit } = useFormContext()
   const { data: countries = [] } = useAllCountries()
 
   const countryOptions = countries.map((c: any) => {
@@ -39,61 +36,61 @@ export function CitiesFormModal({
     return { value: String(c.id), label: name }
   })
 
-  const getInitialValues = () => {
-    if (!editingItem) {
-      return { nameAr: '', nameEn: '', country_id: '', is_active: true }
-    }
-    const nameAr = editingItem.translations?.find((t: any) => t.language_id === 2)?.name || ''
-    const nameEn = editingItem.translations?.find((t: any) => t.language_id === 1)?.name || editingItem.name || ''
-    return {
-      nameAr,
-      nameEn,
-      country_id: String(editingItem.country_id || ''),
-      is_active: editingItem.is_active ?? true
-    }
-  }
-
-  const methods = useZodForm(schema, getInitialValues())
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
-      methods.reset(getInitialValues())
+      reset(getInitialValues(editingItem))
     }
-  }, [editingItem, open])
+  }, [editingItem, open, reset])
+
+  const isRtl = i18n.language === 'ar'
 
   return (
     <ModalStatus
       open={open}
       onOpenChange={onOpenChange}
-      title={editingItem ? `Edit ${label}` : `Add New ${label}`}
-      agreeLabel="Save"
-      cancelLabel="Cancel"
-      onAgreeButtonClick={methods.handleSubmit(onSave)}
+      title={editingItem ? `${t('edit')} ${label}` : `${t('add')} ${label}`}
+      agreeLabel={t('save') || "Save"}
+      cancelLabel={t('cancel') || "Cancel"}
+      onAgreeButtonClick={handleSubmit(onSave)}
       onCancelButtonClick={() => onOpenChange(false)}
       loading={loading}
+      size="lg"
     >
-      <FormProvider {...methods}>
-        <div className="space-y-4 text-right" dir="rtl">
-          <div className="grid grid-cols-2 gap-4">
-            <BaseInputField name="nameAr" label="Arabic Name / الاسم بالعربية" required />
-            <BaseInputField name="nameEn" label="English Name / الاسم بالإنجليزية" required />
+      <div className="space-y-4" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="grid grid-cols-2 gap-4">
+          <BaseInputField name="nameAr" label={t('arabicName') || 'Arabic Name'} required disabled={isViewOnly} />
+          <BaseInputField name="nameEn" label={t('englishName') || 'English Name'} required disabled={isViewOnly} />
+        </div>
+        <div className="grid grid-cols-2 gap-4 items-center">
+          <div className={isRtl ? 'text-right' : 'text-left'}>
+            <ControlledSelect
+              name="country_id"
+              control={control}
+              label={`${t('country') || 'Country'} *`}
+              options={countryOptions}
+              placeholder={t('chooseCountry') || 'Choose country...'}
+              disabled={isViewOnly}
+            />
           </div>
-          <div className="grid grid-cols-2 gap-4 items-center">
-            <div className="text-left" dir="ltr">
-              <ControlledSelect
-                name="country_id"
-                control={methods.control}
-                label="Country / الدولة *"
-                options={countryOptions}
-                placeholder="Choose country..."
-              />
-            </div>
-            <div className="pt-5 flex items-center justify-start">
-              <ControlledCheckbox name="is_active" control={methods.control} label="Active / نشط" />
-            </div>
+          <div className="flex flex-col gap-1.5 justify-center items-start">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+              {t('status') || 'Status'}
+            </label>
+            <Controller
+              name="is_active"
+              control={control}
+              render={({ field }) => (
+                <StatusDropdown
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isViewOnly}
+                  usePortal={false}
+                />
+              )}
+            />
           </div>
         </div>
-      </FormProvider>
+      </div>
     </ModalStatus>
   )
 }

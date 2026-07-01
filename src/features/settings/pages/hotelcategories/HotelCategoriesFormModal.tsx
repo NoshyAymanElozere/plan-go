@@ -1,16 +1,10 @@
-import React from 'react'
-import { FormProvider } from 'react-hook-form'
-import { z } from 'zod'
-import { useZodForm } from '@/shared/components/form-fields'
+import React, { useEffect } from 'react'
+import { useFormContext, Controller } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
 import { BaseInputField } from '@/shared/components/base-input-field'
 import ModalStatus from '@/shared/components/modal-status'
-
-export const schema = z.object({
-  nameAr: z.string().min(1, 'Arabic name is required'),
-  nameEn: z.string().min(1, 'English name is required'),
-  descAr: z.string().optional(),
-  descEn: z.string().optional()
-});
+import { StatusDropdown } from '@/shared/components/StatusDropdown'
+import { getInitialValues } from './validationSchema'
 
 interface HotelCategoriesFormModalProps {
   open: boolean
@@ -19,6 +13,7 @@ interface HotelCategoriesFormModalProps {
   onSave: (data: any) => void
   loading: boolean
   label: string
+  isViewOnly?: boolean
 }
 
 export function HotelCategoriesFormModal({
@@ -27,44 +22,57 @@ export function HotelCategoriesFormModal({
   editingItem,
   onSave,
   loading,
-  label
+  label,
+  isViewOnly = false
 }: HotelCategoriesFormModalProps) {
-  const methods = useZodForm(
-    schema,
-    editingItem || { nameAr: '', nameEn: '', descAr: '', descEn: '' }
-  )
+  const { control, reset, handleSubmit } = useFormContext()
+  const { t, i18n } = useTranslation()
 
-  React.useEffect(() => {
-    if (editingItem) {
-      methods.reset(editingItem)
-    } else {
-      methods.reset({ nameAr: '', nameEn: '', descAr: '', descEn: '' })
+  useEffect(() => {
+    if (open) {
+      reset(getInitialValues(editingItem))
     }
-  }, [editingItem, open, methods.reset])
+  }, [editingItem, open, reset])
+
+  const isRtl = i18n.language === 'ar'
 
   return (
     <ModalStatus
       open={open}
       onOpenChange={onOpenChange}
-      title={editingItem ? `Edit ${label}` : `Add New ${label}`}
-      agreeLabel="Save"
-      cancelLabel="Cancel"
-      onAgreeButtonClick={methods.handleSubmit(onSave)}
+      title={isViewOnly ? `${t('view')} ${label}` : editingItem ? `${t('edit')} ${label}` : `${t('add')} ${label}`}
+      agreeLabel={isViewOnly ? undefined : t('save') || "Save"}
+      cancelLabel={isViewOnly ? t('close') || "Close" : t('cancel') || "Cancel"}
+      onAgreeButtonClick={isViewOnly ? undefined : handleSubmit(onSave)}
       onCancelButtonClick={() => onOpenChange(false)}
       loading={loading}
+      size="lg"
     >
-      <FormProvider {...methods}>
-        <div className="space-y-4 text-right" dir="rtl">
-          <div className="grid grid-cols-2 gap-4">
-                        <BaseInputField name="nameAr" label="Arabic Name / الاسم بالعربية" required />
-                        <BaseInputField name="nameEn" label="English Name" required />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <BaseInputField name="descAr" label="Arabic Description / الوصف بالعربية" />
-                        <BaseInputField name="descEn" label="English Description" />
-                      </div>
+      <div className="space-y-4" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="grid grid-cols-2 gap-4">
+          <BaseInputField name="nameAr" label={t('arabicName') || 'Arabic Name'} required disabled={isViewOnly} />
+          <BaseInputField name="nameEn" label={t('englishName') || 'English Name'} required disabled={isViewOnly} />
         </div>
-      </FormProvider>
+        <div className="grid grid-cols-2 gap-4 items-center">
+          <div className="flex flex-col gap-1.5 justify-center items-start">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+              {t('status') || 'Status'}
+            </label>
+            <Controller
+              name="is_active"
+              control={control}
+              render={({ field }) => (
+                <StatusDropdown
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isViewOnly}
+                  usePortal={false}
+                />
+              )}
+            />
+          </div>
+        </div>
+      </div>
     </ModalStatus>
   )
 }

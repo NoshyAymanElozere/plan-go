@@ -1,39 +1,63 @@
 import React, { useState } from 'react'
-import { Plus, Trash2, Pencil } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { FormProvider } from 'react-hook-form'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/card'
 import { Button } from '@/shared/components/button'
 import { SearchInput } from '@/shared/components/input'
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableEmpty, TableSkeleton
-} from '@/shared/components/table'
+import { useZodForm } from '@/shared/components/form-fields'
 import ModalStatus from '@/shared/components/modal-status'
+import { GenericDataGrid } from '@/shared/components/GenericDataGrid'
 import {
-  useSettingsList,
-  useCreateSettingsItem,
-  useUpdateSettingsItem,
-  useDeleteSettingsItem
-} from '../../api/useSettings'
+  useGroundServicesList,
+  useCreateGroundService,
+  useUpdateGroundService,
+  useDeleteGroundService,
+  useToggleGroundServiceStatus
+} from '../../api/useGroundServices'
+import { getGroundServicesColumnDefs } from './ColumnDefs'
 import { GroundServicesFormModal } from './GroundServicesFormModal'
+import { getInitialValues, schema } from './validationSchema'
 
 export default function GroundServicesPage() {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
-  const label = t('groundServices') || 'GroundServices'
-  const { data: items = [], isLoading } = useSettingsList('groundservices', search)
-
-  const createMutation = useCreateSettingsItem('groundservices')
-  const updateMutation = useUpdateSettingsItem('groundservices')
-  const deleteMutation = useDeleteSettingsItem('groundservices')
+  const [page, setPage] = useState(1)
+  const label = t('groundServices') || 'Ground Services'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deletingItem, setDeletingItem] = useState<any | null>(null)
+  const [isViewOnly, setIsViewOnly] = useState(false)
+
+  const methods = useZodForm(schema, getInitialValues(editingItem))
+
+  const { data: paginatedData, isLoading } = useGroundServicesList(page, search)
+  const items = paginatedData?.data || []
+
+  const createMutation = useCreateGroundService()
+  const updateMutation = useUpdateGroundService()
+  const deleteMutation = useDeleteGroundService()
+  const toggleMutation = useToggleGroundServiceStatus()
 
   const handleSave = (formData: any) => {
+    const data = new FormData()
+    data.append('price', String(formData.price))
+    data.append('is_active', formData.is_active ? '1' : '0')
+    if (formData.image && formData.image[0]) {
+      data.append('image', formData.image[0])
+    }
+    data.append('translations[0][language_id]', '1')
+    data.append('translations[0][name]', formData.nameEn)
+    data.append('translations[0][description]', formData.descEn)
+    data.append('translations[1][language_id]', '2')
+    data.append('translations[1][name]', formData.nameAr)
+    data.append('translations[1][description]', formData.descAr)
+
     if (editingItem) {
+      data.append('_method', 'PUT')
       updateMutation.mutate(
-        { id: editingItem.id, data: formData },
+        { id: editingItem.id, formData: data },
         {
           onSuccess: () => {
             setIsModalOpen(false)
@@ -42,7 +66,7 @@ export default function GroundServicesPage() {
         }
       )
     } else {
-      createMutation.mutate(formData, {
+      createMutation.mutate(data, {
         onSuccess: () => {
           setIsModalOpen(false)
         }
@@ -50,88 +74,79 @@ export default function GroundServicesPage() {
     }
   }
 
+  const columnDefs = getGroundServicesColumnDefs({
+    t,
+    toggleMutation,
+    setEditingItem,
+    setIsModalOpen,
+    setDeletingItem,
+    setIsViewOnly
+  })
+
   return (
-    <Card className="border-border/60 shadow-sm rounded-2xl overflow-hidden bg-white">
-      <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-gray-50 px-6 py-5">
-        <CardTitle className="text-lg font-bold text-gray-800">{label}</CardTitle>
-        <Button onClick={() => { setEditingItem(null); setIsModalOpen(true); }} className="h-9 px-4 rounded-xl">
-          <Plus className="mr-2 h-4 w-4" /> {t('add') || 'Add New'}
-        </Button>
-      </CardHeader>
-      <CardContent className="p-6 space-y-4">
-        <div className="flex max-w-sm">
-          <SearchInput
-            placeholder={`${t('search') || 'Search'} ${label}...`}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+    <FormProvider {...methods}>
+      <Card className="border-border/60 shadow-sm rounded-2xl overflow-hidden bg-card">
+        <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-border/40 px-6 py-5">
+          <CardTitle className="text-lg font-bold text-foreground">{label}</CardTitle>
+          <Button onClick={() => { setEditingItem(null); setIsViewOnly(false); setIsModalOpen(true); }} className="h-9 px-4 rounded-xl">
+            <Plus className="mr-2 h-4 w-4" /> {t('add') || 'Add New'}
+          </Button>
+        </CardHeader>
+        <CardContent className="p-6 space-y-4">
+          <div className="flex max-w-sm">
+            <SearchInput
+              placeholder={`${t('search') || 'Search'} ${label}...`}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value)
+                setPage(1)
+              }}
+            />
+          </div>
+
+          <GenericDataGrid
+            rowData={items}
+            columnDefs={columnDefs}
+            rowHeight={50}
+            headerHeight={50}
+            loading={isLoading}
+            onViewRow={(data) => {
+              setEditingItem(data)
+              setIsViewOnly(true)
+              setIsModalOpen(true)
+            }}
           />
-        </div>
+        </CardContent>
 
-        <div className="rounded-xl border border-border/60 overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('arabicName') || 'Arabic Name'}</TableHead>
-                <TableHead>{t('englishName') || 'English Name'}</TableHead>
-                <TableHead className="text-right">Price</TableHead>
-                <TableHead className="w-[100px] text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableSkeleton rows={4} cols={4} />
-              ) : items.length === 0 ? (
-                <TableEmpty message="No items found." />
-              ) : (
-                items.map((item: any) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-semibold text-gray-800">{item.nameAr}</TableCell>
-                    <TableCell className="font-semibold text-gray-800">{item.nameEn}</TableCell>
-                    <TableCell className="text-right font-bold text-main">${item.price}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <Button variant="ghost" size="icon-sm" onClick={() => { setEditingItem(item); setIsModalOpen(true); }}>
-                          <Pencil className="h-4.5 w-4.5 text-gray-500" />
-                        </Button>
-                        <Button variant="ghost" size="icon-sm" onClick={() => setDeletingItem(item)}>
-                          <Trash2 className="h-4.5 w-4.5 text-rose-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
+        <GroundServicesFormModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          editingItem={editingItem}
+          onSave={handleSave}
+          loading={createMutation.isPending || updateMutation.isPending}
+          label={label}
+          isViewOnly={isViewOnly}
+        />
 
-      <GroundServicesFormModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        editingItem={editingItem}
-        onSave={handleSave}
-        loading={createMutation.isPending || updateMutation.isPending}
-        label={label}
-      />
-
-      <ModalStatus
-        open={!!deletingItem}
-        onOpenChange={(v) => !v && setDeletingItem(null)}
-        title={`${t('delete') || 'Delete'} ${label}`}
-        description="Are you sure you want to delete this item? This action cannot be undone."
-        agreeLabel={t('delete') || 'Delete'}
-        cancelLabel={t('cancel') || 'Cancel'}
-        onAgreeButtonClick={() => {
-          if (deletingItem) {
-            deleteMutation.mutate(deletingItem.id, {
-              onSuccess: () => setDeletingItem(null)
-            })
-          }
-        }}
-        onCancelButtonClick={() => setDeletingItem(null)}
-        loading={deleteMutation.isPending}
-      />
-    </Card>
+        <ModalStatus
+          open={!!deletingItem}
+          onOpenChange={(v) => !v && setDeletingItem(null)}
+          title={`${t('delete') || 'Delete'} ${label}`}
+          description={t('deleteConfirmation') || "Are you sure you want to delete this item? This action cannot be undone."}
+          agreeLabel={t('delete') || 'Delete'}
+          cancelLabel={t('cancel') || 'Cancel'}
+          onAgreeButtonClick={() => {
+            if (deletingItem) {
+              deleteMutation.mutate(deletingItem.id, {
+                onSuccess: () => setDeletingItem(null)
+              })
+            }
+          }}
+          onCancelButtonClick={() => setDeletingItem(null)}
+          loading={deleteMutation.isPending}
+          type="delete"
+        />
+      </Card>
+    </FormProvider>
   )
 }

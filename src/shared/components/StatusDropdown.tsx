@@ -1,28 +1,36 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronDown, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface StatusDropdownProps {
   value: boolean
   onChange: (value: boolean) => void
   disabled?: boolean
+  usePortal?: boolean
 }
 
-export function StatusDropdown({ value, onChange, disabled }: StatusDropdownProps) {
+export function StatusDropdown({ value, onChange, disabled, usePortal = true }: StatusDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 })
+  const { t, i18n } = useTranslation()
+  const isRtl = i18n.language === 'ar'
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      const isInsideTrigger = containerRef.current?.contains(target)
+      const isInsideDropdown = dropdownRef.current?.contains(target)
+      if (!isInsideTrigger && !isInsideDropdown) {
         setIsOpen(false)
       }
     }
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
-      if (buttonRef.current) {
+      if (usePortal && buttonRef.current) {
         const rect = buttonRef.current.getBoundingClientRect()
         setCoords({
           top: rect.bottom,
@@ -34,18 +42,10 @@ export function StatusDropdown({ value, onChange, disabled }: StatusDropdownProp
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isOpen])
+  }, [isOpen, usePortal])
 
-  const dropdownContent = isOpen && (
-    <div
-      className="fixed rounded-xl border border-border/60 bg-card p-1 shadow-lg z-[9999] animate-in fade-in slide-in-from-top-1 duration-150"
-      style={{
-        top: coords.top + 6,
-        left: coords.left,
-        minWidth: '120px'
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
+  const dropdownInner = (
+    <>
       <button
         onClick={() => {
           onChange(true)
@@ -55,7 +55,7 @@ export function StatusDropdown({ value, onChange, disabled }: StatusDropdownProp
       >
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          <span>Active</span>
+          <span>{t('active') || 'Active'}</span>
         </div>
         {value && <Check className="h-3 w-3" />}
       </button>
@@ -69,10 +69,40 @@ export function StatusDropdown({ value, onChange, disabled }: StatusDropdownProp
       >
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-          <span>Inactive</span>
+          <span>{t('inactive') || 'Inactive'}</span>
         </div>
         {!value && <Check className="h-3 w-3" />}
       </button>
+    </>
+  )
+
+  const portalDropdownContent = isOpen && usePortal && (
+    <div
+      ref={dropdownRef}
+      className="fixed rounded-xl border border-border/60 bg-card p-1 shadow-lg z-[9999] animate-in fade-in slide-in-from-top-1 duration-150"
+      style={{
+        top: coords.top + 6,
+        left: coords.left,
+        minWidth: '120px'
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {dropdownInner}
+    </div>
+  )
+
+  const inlineDropdownContent = isOpen && !usePortal && (
+    <div
+      ref={dropdownRef}
+      className={`absolute mt-1.5 rounded-xl border border-border/60 bg-card p-1 shadow-lg z-[9999] animate-in fade-in slide-in-from-top-1 duration-150 ${
+        isRtl ? 'right-0' : 'left-0'
+      }`}
+      style={{
+        minWidth: '120px'
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {dropdownInner}
     </div>
   )
 
@@ -92,12 +122,11 @@ export function StatusDropdown({ value, onChange, disabled }: StatusDropdownProp
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <span className={`h-1.5 w-1.5 rounded-full ${value ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-        <span>{value ? 'Active' : 'Inactive'}</span>
+        <span>{value ? t('active') || 'Active' : t('inactive') || 'Inactive'}</span>
         <ChevronDown className={`h-3 w-3 opacity-60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {isOpen && createPortal(dropdownContent, document.body)}
+      {usePortal ? (isOpen && createPortal(portalDropdownContent, document.body)) : inlineDropdownContent}
     </div>
   )
 }
-

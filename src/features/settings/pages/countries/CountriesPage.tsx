@@ -28,6 +28,7 @@ export default function CountriesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deletingItem, setDeletingItem] = useState<any | null>(null)
+  const [isViewOnly, setIsViewOnly] = useState(false)
 
   const methods = useZodForm(schema, getInitialValues(editingItem))
 
@@ -42,6 +43,7 @@ export default function CountriesPage() {
   const handleSave = (formData: any) => {
     const data = new FormData()
     data.append('code', formData.code)
+    data.append('phone_code', formData.phone_code)
     data.append('is_active', formData.is_active ? '1' : '0')
     if (formData.image && formData.image[0]) {
       data.append('image', formData.image[0])
@@ -76,7 +78,8 @@ export default function CountriesPage() {
     toggleMutation,
     setEditingItem,
     setIsModalOpen,
-    setDeletingItem
+    setDeletingItem,
+    setIsViewOnly
   })
 
   return (
@@ -85,7 +88,7 @@ export default function CountriesPage() {
       <Card className="border-border/60 shadow-sm rounded-2xl overflow-hidden bg-card">
         <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-border/40 px-6 py-5">
           <CardTitle className="text-lg font-bold text-foreground">{label}</CardTitle>
-          <Button onClick={() => { setEditingItem(null); setIsModalOpen(true); }} className="h-9 px-4 rounded-xl">
+          <Button onClick={() => { setEditingItem(null); setIsViewOnly(false); setIsModalOpen(true); }} className="h-9 px-4 rounded-xl">
             <Plus className="mr-2 h-4 w-4" /> {t('add') || 'Add New'}
           </Button>
         </CardHeader>
@@ -104,9 +107,14 @@ export default function CountriesPage() {
           <GenericDataGrid 
             rowData={items} 
             columnDefs={columnDefs} 
-           rowHeight={50 }
-          headerHeight={50}
+            rowHeight={50}
+            headerHeight={50}
             loading={isLoading} 
+            onViewRow={(data) => {
+              setEditingItem(data)
+              setIsViewOnly(true)
+              setIsModalOpen(true)
+            }}
           />
 
         </CardContent>
@@ -118,13 +126,14 @@ export default function CountriesPage() {
           onSave={handleSave}
           loading={createMutation.isPending || updateMutation.isPending}
           label={label}
+          isViewOnly={isViewOnly}
         />
 
         <ModalStatus
           open={!!deletingItem}
           onOpenChange={(v) => !v && setDeletingItem(null)}
           title={`${t('delete') || 'Delete'} ${label}`}
-          description="Are you sure you want to delete this item? This action cannot be undone."
+          description={t('deleteConfirmation') || "Are you sure you want to delete this item? This action cannot be undone."}
           agreeLabel={t('delete') || 'Delete'}
           cancelLabel={t('cancel') || 'Cancel'}
           onAgreeButtonClick={() => {
@@ -136,6 +145,7 @@ export default function CountriesPage() {
           }}
           onCancelButtonClick={() => setDeletingItem(null)}
           loading={deleteMutation.isPending}
+          type="delete"
         />
       </Card>
     </FormProvider>
