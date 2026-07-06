@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -84,7 +84,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -196,4 +196,11 @@
 .ck.ck-toolbar .ck-button.ck-on {
   background: rgba(121, 119, 233, 0.1) !important;
   color: #7977e9 !important;
+}
+
+/* Remove AG Grid Cell Focus Border */
+.ag-cell:focus, .ag-cell-focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }

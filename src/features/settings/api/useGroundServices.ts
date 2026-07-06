@@ -100,3 +100,13 @@ export function useDeleteGroundService() {
     }
   })
 }
+
+export function useAllGroundServices() {
+  return useQuery({
+    queryKey: ['all-groundservices'],
+    queryFn: async () => {
+      const response = await api.get('/admin/ground-handling-services?per_page=1000')
+      return response.data.data.data || []
+    }
+  })
+}

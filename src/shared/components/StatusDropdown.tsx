@@ -47,6 +47,7 @@ export function StatusDropdown({ value, onChange, disabled, usePortal = true }: 
   const dropdownInner = (
     <>
       <button
+        type="button"
         onClick={() => {
           onChange(true)
           setIsOpen(false)
@@ -61,6 +62,7 @@ export function StatusDropdown({ value, onChange, disabled, usePortal = true }: 
       </button>
 
       <button
+        type="button"
         onClick={() => {
           onChange(false)
           setIsOpen(false)
@@ -109,6 +111,7 @@ export function StatusDropdown({ value, onChange, disabled, usePortal = true }: 
   return (
     <div className="relative inline-block text-left" ref={containerRef}>
       <button
+        type="button"
         ref={buttonRef}
         onClick={(e) => {
           e.stopPropagation()

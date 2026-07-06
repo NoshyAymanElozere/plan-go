@@ -12,7 +12,6 @@ import Login from '@/features/auth/pages/Login'
 // Import sub-route pages directly
 import CountriesPage from '@/features/settings/pages/countries/CountriesPage'
 import CitiesPage from '@/features/settings/pages/cities/CitiesPage'
-import CurrenciesPage from '@/features/settings/pages/currencies/CurrenciesPage'
 import TripTypesPage from '@/features/settings/pages/triptypes/TripTypesPage'
 import TravelerTypesPage from '@/features/settings/pages/travelertypes/TravelerTypesPage'
 import HotelCategoriesPage from '@/features/settings/pages/hotelcategories/HotelCategoriesPage'
@@ -25,6 +24,15 @@ import PrivacyPolicyPage from '@/features/settings/pages/privacypolicy/PrivacyPo
 import TermsConditionsPage from '@/features/settings/pages/termsconditions/TermsConditionsPage'
 import SupportPage from '@/features/settings/pages/support/SupportPage'
 import FooterPage from '@/features/settings/pages/footer/FooterPage'
+import TouristDestinationsPage from '@/features/settings/pages/touristdestinations/TouristDestinationsPage'
+import TouristDestinationFormPage from '@/features/settings/pages/touristdestinations/TouristDestinationFormPage'
+import TouristDestinationDetailsPage from '@/features/settings/pages/touristdestinations/TouristDestinationDetailsPage'
+import TouristAttractionsPage from '@/features/settings/pages/touristattractions/TouristAttractionsPage'
+import TouristAttractionFormPage from '@/features/settings/pages/touristattractions/TouristAttractionFormPage'
+import TouristAttractionDetailsPage from '@/features/settings/pages/touristattractions/TouristAttractionDetailsPage'
+import TravelPackagesPage from '@/features/settings/pages/travelpackages/TravelPackagesPage'
+import TravelPackageFormPage from '@/features/settings/pages/travelpackages/TravelPackageFormPage'
+import TravelPackageDetailsPage from '@/features/settings/pages/travelpackages/TravelPackageDetailsPage'
 
 import { ProtectedRoute, PublicRoute } from '@/shared/components/RouteGuards'
 
@@ -37,7 +45,7 @@ const Placeholder = ({ title }: { title: string }) => (
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/plan-go">
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicRoute />}>
@@ -48,13 +56,6 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
-            <Route path="products" element={<Placeholder title="Products" />} />
-            <Route path="customers" element={<Placeholder title="Customers" />} />
-            <Route path="orders" element={<Placeholder title="Orders" />} />
-            <Route path="inventory" element={<Placeholder title="Inventory" />} />
-            <Route path="suppliers" element={<Placeholder title="Suppliers" />} />
-            <Route path="invoices" element={<Placeholder title="Invoices" />} />
-            <Route path="payments" element={<Placeholder title="Payments" />} />
             <Route path="reports" element={<Reports />} />
             <Route path="analytics" element={<Analytics />} />
             {/*  start settings routes  */}
@@ -62,7 +63,6 @@ function App() {
               <Route index element={<Navigate to="countries" replace />} />
               <Route path="countries" element={<CountriesPage />} />
               <Route path="cities" element={<CitiesPage />} />
-              <Route path="currencies" element={<CurrenciesPage />} />
               <Route path="triptypes" element={<TripTypesPage />} />
               <Route path="travelertypes" element={<TravelerTypesPage />} />
               <Route path="hotelcategories" element={<HotelCategoriesPage />} />
@@ -74,6 +74,18 @@ function App() {
               <Route path="privacypolicy" element={<PrivacyPolicyPage />} />
               <Route path="termsconditions" element={<TermsConditionsPage />} />
               <Route path="support" element={<SupportPage />} />
+              <Route path="touristdestinations" element={<TouristDestinationsPage />} />
+              <Route path="touristdestinations/new" element={<TouristDestinationFormPage />} />
+              <Route path="touristdestinations/:id" element={<TouristDestinationDetailsPage />} />
+              <Route path="touristdestinations/:id/edit" element={<TouristDestinationFormPage />} />
+              <Route path="touristattractions" element={<TouristAttractionsPage />} />
+              <Route path="touristattractions/new" element={<TouristAttractionFormPage />} />
+              <Route path="touristattractions/:id" element={<TouristAttractionDetailsPage />} />
+              <Route path="touristattractions/:id/edit" element={<TouristAttractionFormPage />} />
+              <Route path="travelpackages" element={<TravelPackagesPage />} />
+              <Route path="travelpackages/new" element={<TravelPackageFormPage />} />
+              <Route path="travelpackages/:id" element={<TravelPackageDetailsPage />} />
+              <Route path="travelpackages/:id/edit" element={<TravelPackageFormPage />} />
               <Route path="footer" element={<FooterPage />} />
             </Route>
             {/* end setting routes */}

@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5 justify-center items-start">
+            {/* <div className="flex flex-col gap-1.5 justify-center items-start">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
                 {t('status') || 'Status'}
               </label>
@@ -160,7 +160,7 @@ export default function PrivacyPolicyPage() {
                   />
                 )}
               />
-            </div>
+            </div> */}
 
             <div className="pt-4 border-t border-gray-50 flex justify-end">
               <Button type="submit" loading={saveMutation.isPending} className="px-6 h-10 rounded-xl">

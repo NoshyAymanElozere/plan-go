@@ -71,7 +71,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { data: admin } = useProfile()
   const { mutate: logout } = useLogout()
 
-  const titleKey = routeTitles[location.pathname] ?? 'ERP Suite'
+  const titleKey = routeTitles[location.pathname] 
   const title = t(titleKey)
   const unreadCount = mockNotifications.filter((n) => !n.read).length
 

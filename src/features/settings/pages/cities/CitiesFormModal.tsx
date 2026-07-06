@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react'
 import { useFormContext, Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { ControlledSelect } from '@/shared/components/form-fields'
 import { BaseInputField } from '@/shared/components/base-input-field'
 import ModalStatus from '@/shared/components/modal-status'
 import { StatusDropdown } from '@/shared/components/StatusDropdown'
-import { useAllCountries } from '../../api/useCountries'
+import { CountrySelect } from '@/shared/components/selects/CountrySelect'
 import { getInitialValues } from './validationSchema'
 
 interface CitiesFormModalProps {
@@ -29,12 +28,6 @@ export function CitiesFormModal({
 }: CitiesFormModalProps) {
   const { i18n, t } = useTranslation()
   const { control, reset, handleSubmit } = useFormContext()
-  const { data: countries = [] } = useAllCountries()
-
-  const countryOptions = countries.map((c: any) => {
-    const name = c.translations?.find((t: any) => t.language_id === (i18n.language === 'ar' ? 2 : 1))?.name || c.name || ''
-    return { value: String(c.id), label: name }
-  })
 
   useEffect(() => {
     if (open) {
@@ -63,12 +56,8 @@ export function CitiesFormModal({
         </div>
         <div className="grid grid-cols-2 gap-4 items-center">
           <div className={isRtl ? 'text-right' : 'text-left'}>
-            <ControlledSelect
-              name="country_id"
+            <CountrySelect
               control={control}
-              label={`${t('country') || 'Country'} *`}
-              options={countryOptions}
-              placeholder={t('chooseCountry') || 'Choose country...'}
               disabled={isViewOnly}
             />
           </div>

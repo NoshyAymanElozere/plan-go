@@ -47,7 +47,7 @@ const DialogContent = React.forwardRef<
         ref={ref}
         className={cn(
           'fixed left-[50%] top-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%]',
-          'gap-4 bg-card border border-border/60 shadow-2xl p-6 rounded-xl',
+          'gap-4 bg-card border border-border/60 shadow-2xl p-6 rounded-xl overflow-visible',
           'duration-200',
           'data-[state=open]:animate-dialog-show data-[state=closed]:animate-dialog-hide',
           sizeClasses[size],

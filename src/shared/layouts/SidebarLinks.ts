@@ -1,7 +1,6 @@
 export const settingLinks = [
     { value: 'countries', label: 'countries' },
     { value: 'cities', label: 'cities' },
-    { value: 'currencies', label: 'currencies' },
     { value: 'triptypes', label: 'tripTypes' },
     { value: 'travelertypes', label: 'travelerTypes' },
     { value: 'hotelcategories', label: 'hotelCategories' },

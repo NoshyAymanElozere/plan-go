@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-  ArrowUpRight, Plus, Download, Cpu, Compass, Layers, Laptop, Monitor, MoreHorizontal
+  ArrowUpRight, Plus, Download, Compass, Map, MapPin, Briefcase, Users, Globe, Landmark, Calendar, MoreHorizontal
 } from 'lucide-react'
 import { Card, CardContent } from '@/shared/components/card'
 import { Badge } from '@/shared/components/badge'
@@ -29,82 +29,85 @@ export default function Dashboard() {
             <Download className="h-4 w-4" /> {t('importData')}
           </button>
           <button className="flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl bg-main text-white text-sm font-semibold hover:opacity-90 transition-colors shadow-sm">
-            <Plus className="h-4 w-4" /> {t('addProject')}
+            <Plus className="h-4 w-4" /> {t('new') || '+ New'}
           </button>
         </div>
       </div>
 
       {/* Stats Cards Row */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Projects (Brand Gradient Card) */}
+        {/* Total Travel Packages (Brand Gradient Card) */}
         <div className="bg-main-gradient text-white rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between h-36">
           <div className="flex justify-between items-start">
-            <span className="text-sm font-medium opacity-90">{t('totalProjects')}</span>
-            <button className="h-7 w-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-              <ArrowUpRight className="h-4 w-4 text-white" />
-            </button>
+            <span className="text-sm font-medium opacity-90">{t('travelPackages')}</span>
+            <div className="h-7 w-7 rounded-full bg-white/10 flex items-center justify-center">
+              <Briefcase className="h-4 w-4 text-white" />
+            </div>
           </div>
           <div>
-            <h2 className="text-4xl font-extrabold tracking-tight">24</h2>
+            <h2 className="text-4xl font-extrabold tracking-tight">48</h2>
             <div className="flex items-center gap-1.5 mt-2.5">
               <span className="flex h-5 items-center justify-center rounded-md bg-white/15 px-2 text-[10px] font-bold text-white">
-                5%
+                +12%
               </span>
               <span className="text-[10px] opacity-75 font-semibold">{t('increasedFromLastMonth')}</span>
             </div>
           </div>
         </div>
 
-        {/* Ended Projects */}
+        {/* Tourist Destinations */}
         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-start">
-            <span className="text-sm font-semibold text-gray-400">{t('endedProjects')}</span>
-            <button className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-              <ArrowUpRight className="h-4 w-4 text-gray-800" />
-            </button>
+            <span className="text-sm font-semibold text-gray-400">{t('touristDestinations')}</span>
+            <div className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center">
+              <Map className="h-4 w-4 text-gray-500" />
+            </div>
           </div>
           <div>
-            <h2 className="text-4xl font-extrabold text-[#111827] tracking-tight">10</h2>
+            <h2 className="text-4xl font-extrabold text-[#111827] tracking-tight">18</h2>
             <div className="flex items-center gap-1.5 mt-2.5">
               <span className="flex h-5 items-center justify-center rounded-md bg-green-50 px-2 text-[10px] font-bold text-emerald-700">
-                6%
+                Active
               </span>
-              <span className="text-[10px] text-gray-400 font-semibold">{t('increasedFromLastMonth')}</span>
+              <span className="text-[10px] text-gray-400 font-semibold">Across 5 Countries</span>
             </div>
           </div>
         </div>
 
-        {/* Running Projects */}
+        {/* Tourist Attractions */}
         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-start">
-            <span className="text-sm font-semibold text-gray-400">{t('runningProjects')}</span>
-            <button className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-              <ArrowUpRight className="h-4 w-4 text-gray-800" />
-            </button>
+            <span className="text-sm font-semibold text-gray-400">{t('touristAttractions')}</span>
+            <div className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center">
+              <MapPin className="h-4 w-4 text-gray-500" />
+            </div>
           </div>
           <div>
-            <h2 className="text-4xl font-extrabold text-[#111827] tracking-tight">12</h2>
+            <h2 className="text-4xl font-extrabold text-[#111827] tracking-tight">124</h2>
             <div className="flex items-center gap-1.5 mt-2.5">
               <span className="flex h-5 items-center justify-center rounded-md bg-green-50 px-2 text-[10px] font-bold text-emerald-700">
-                2%
+                +8%
               </span>
-              <span className="text-[10px] text-gray-400 font-semibold">{t('increasedFromLastMonth')}</span>
+              <span className="text-[10px] text-gray-400 font-semibold">New attractions added</span>
             </div>
           </div>
         </div>
 
-        {/* Pending Project */}
+        {/* Total Bookings */}
         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-36">
           <div className="flex justify-between items-start">
-            <span className="text-sm font-semibold text-gray-400">{t('pendingProject')}</span>
-            <button className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-              <ArrowUpRight className="h-4 w-4 text-gray-800" />
-            </button>
+            <span className="text-sm font-semibold text-gray-400">{t('totalBookings') || 'Total Bookings'}</span>
+            <div className="h-7 w-7 rounded-full bg-gray-50 flex items-center justify-center">
+              <Users className="h-4 w-4 text-gray-500" />
+            </div>
           </div>
           <div>
-            <h2 className="text-4xl font-extrabold text-[#111827] tracking-tight">2</h2>
+            <h2 className="text-4xl font-extrabold text-[#111827] tracking-tight">1,842</h2>
             <div className="flex items-center gap-1.5 mt-2.5">
-              <span className="text-[10px] text-amber-600 font-bold">{t('onDiscuss')}</span>
+              <span className="flex h-5 items-center justify-center rounded-md bg-green-50 px-2 text-[10px] font-bold text-emerald-700">
+                +18.2%
+              </span>
+              <span className="text-[10px] text-gray-400 font-semibold">{t('increasedFromLastMonth')}</span>
             </div>
           </div>
         </div>
@@ -126,10 +129,10 @@ export default function Dashboard() {
           {/* Reusable Reminders Card */}
           <MeetingReminder />
 
-          {/* Project List */}
+          {/* Featured Travel Packages List */}
           <Card className="border border-gray-100 rounded-2xl shadow-xs bg-white">
             <div className="p-6 pb-2 flex justify-between items-center">
-              <h3 className="font-bold text-[#111827] text-base">{t('project')}</h3>
+              <h3 className="font-bold text-[#111827] text-base">{t('featuredPackages')}</h3>
               <button className="flex items-center gap-1 text-[11px] font-bold text-gray-600 border border-gray-100 py-1 px-2.5 rounded-lg hover:bg-gray-50 transition-colors">
                 {t('new')}
               </button>
@@ -137,11 +140,11 @@ export default function Dashboard() {
             <CardContent className="p-6">
               <div className="space-y-4">
                 {[
-                  { title: 'Develop API Endpoints', due: 'Nov 26, 2024', icon: Cpu, iconColor: 'text-blue-500 bg-blue-50' },
-                  { title: 'Onboarding Flow', due: 'Nov 28, 2024', icon: Compass, iconColor: 'text-main bg-main/10' },
-                  { title: 'Build Dashboard', due: 'Nov 30, 2024', icon: Layers, iconColor: 'text-amber-500 bg-amber-50' },
-                  { title: 'Optimize Page Load', due: 'Dec 5, 2024', icon: Laptop, iconColor: 'text-indigo-500 bg-indigo-50' },
-                  { title: 'Cross-Browser Testing', due: 'Dec 6, 2024', icon: Monitor, iconColor: 'text-purple-500 bg-purple-50' }
+                  { title: 'Dubai Luxury Desert Getaway', due: 'July 15, 2026', icon: Globe, iconColor: 'text-blue-500 bg-blue-50' },
+                  { title: 'Cairo Historical Pyramids Tour', due: 'July 20, 2026', icon: Landmark, iconColor: 'text-amber-500 bg-amber-50' },
+                  { title: 'Paris Honeymoon Package', due: 'August 01, 2026', icon: Briefcase, iconColor: 'text-main bg-main/10' },
+                  { title: 'Sharm El Sheikh Resort Stay', due: 'August 10, 2026', icon: Calendar, iconColor: 'text-indigo-500 bg-indigo-50' },
+                  { title: 'Siwa Oasis Adventure Trip', due: 'August 24, 2026', icon: Compass, iconColor: 'text-purple-500 bg-purple-50' }
                 ].map((item, idx) => {
                   const Icon = item.icon
                   return (
@@ -152,7 +155,7 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <h4 className="text-xs font-bold text-gray-800">{item.title}</h4>
-                          <p className="text-[10px] text-gray-400 mt-0.5">Due date: {item.due}</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">{t('due')}: {item.due}</p>
                         </div>
                       </div>
                       <button className="h-6 w-6 text-gray-300 hover:text-gray-500">

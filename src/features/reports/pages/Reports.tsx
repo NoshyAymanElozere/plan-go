@@ -5,13 +5,25 @@ import { mockRevenueData, mockCategoryData } from '@/shared/constants/mockData'
 import { Badge } from '@/shared/components/badge'
 import { TrendingUp, Award, DollarSign, Users } from 'lucide-react'
 import { formatCurrency } from '@/shared/utils/utils'
+import { useTranslation } from 'react-i18next'
 
 export default function Reports() {
+  const { t } = useTranslation()
+
+  const translatedCategoryData = mockCategoryData.map(c => {
+    let key = 'luxuryPackages'
+    if (c.name === 'Beach Resorts') key = 'beachResorts'
+    if (c.name === 'Historical Tours') key = 'historicalTours'
+    if (c.name === 'Adventure Safari') key = 'adventureSafari'
+    if (c.name === 'City Sightseeing') key = 'citySightseeing'
+    return { ...c, name: t(key) }
+  })
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#111827]">Reports</h1>
-        <p className="text-sm text-gray-500 mt-1">Review aggregated performance data and annual comparisons.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-[#111827]">{t('reports') || 'Reports'}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t('reportsSubtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
@@ -22,7 +34,7 @@ export default function Reports() {
                 <DollarSign className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Gross Value</p>
+                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t('totalSales')}</p>
                 <h4 className="text-xl font-bold mt-0.5">{formatCurrency(723000)}</h4>
               </div>
             </div>
@@ -36,7 +48,7 @@ export default function Reports() {
                 <Users className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Acquisition Rate</p>
+                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t('bookingGrowth')}</p>
                 <h4 className="text-xl font-bold mt-0.5">+48.2% YOY</h4>
               </div>
             </div>
@@ -50,8 +62,8 @@ export default function Reports() {
                 <Award className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Top Category</p>
-                <h4 className="text-xl font-bold mt-0.5">Electronics</h4>
+                <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t('topDestination')}</p>
+                <h4 className="text-xl font-bold mt-0.5">{t('topDestinationValue')}</h4>
               </div>
             </div>
           </CardContent>
@@ -61,8 +73,8 @@ export default function Reports() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card className="border border-gray-100 shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-gray-50 px-6 py-4">
-            <CardTitle className="text-base font-bold text-gray-800">Financial Growth</CardTitle>
-            <Badge variant="outline" className="font-semibold text-xs border-gray-100 text-gray-500">Annual YTD</Badge>
+            <CardTitle className="text-base font-bold text-gray-800">{t('financialGrowth')}</CardTitle>
+            <Badge variant="outline" className="font-semibold text-xs border-gray-100 text-gray-500">{t('annualYtd')}</Badge>
           </CardHeader>
           <CardContent className="p-6">
             <div className="h-[280px] w-full">
@@ -76,8 +88,8 @@ export default function Reports() {
                     formatter={(v: number) => formatCurrency(v)}
                   />
                   <Legend verticalAlign="top" height={36} iconType="circle" />
-                  <Line type="monotone" dataKey="revenue" name="Revenue" stroke="var(--main-color)" strokeWidth={3} activeDot={{ r: 6 }} dot={false} />
-                  <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#ef4444" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="revenue" name={t('revenue')} stroke="var(--main-color)" strokeWidth={3} activeDot={{ r: 6 }} dot={false} />
+                  <Line type="monotone" dataKey="expenses" name={t('expenses')} stroke="#ef4444" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -86,20 +98,20 @@ export default function Reports() {
 
         <Card className="border border-gray-100 shadow-xs">
           <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-gray-50 px-6 py-4">
-            <CardTitle className="text-base font-bold text-gray-800">Category Share</CardTitle>
+            <CardTitle className="text-base font-bold text-gray-800">{t('categoryShare')}</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={mockCategoryData} layout="vertical">
+                <BarChart data={translatedCategoryData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f3f4f6" />
                   <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={90} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} width={120} />
                   <Tooltip
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
                     formatter={(v: number) => `${v}%`}
                   />
-                  <Bar dataKey="value" name="Value Share (%)" fill="var(--main-color)" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="value" name={t('valueSharePercent')} fill="var(--main-color)" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

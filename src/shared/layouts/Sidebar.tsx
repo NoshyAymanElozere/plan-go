@@ -16,7 +16,10 @@ import {
   ShoppingCart,
   TrendingUp,
   Truck,
-  Users
+  Users,
+  Briefcase,
+  Map,
+  MapPin
 } from 'lucide-react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,13 +30,6 @@ import { useProfile } from '@/features/auth/api/useAuth'
 
 const navItems = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Products', href: '/products', icon: Package },
-  { label: 'Inventory', href: '/inventory', icon: Boxes },
-  { label: 'Orders', href: '/orders', icon: ShoppingCart, badge: 5 },
-  { label: 'Customers', href: '/customers', icon: Users },
-  { label: 'Suppliers', href: '/suppliers', icon: Truck },
-  { label: 'Invoices', href: '/invoices', icon: FileText },
-  { label: 'Payments', href: '/payments', icon: CreditCard },
   { label: 'Reports', href: '/reports', icon: BarChart3 },
   { label: 'Analytics', href: '/analytics', icon: TrendingUp },
 ]
@@ -123,6 +119,10 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
           </p>
         )}
         <ul className="space-y-1 px-2">
+          <NavItem item={{ label: 'touristDestinations', href: '/settings/touristdestinations', icon: Map }} collapsed={collapsed} />
+          <NavItem item={{ label: 'touristAttractions', href: '/settings/touristattractions', icon: MapPin }} collapsed={collapsed} />
+          <NavItem item={{ label: 'travelPackages', href: '/settings/travelpackages', icon: Briefcase }} collapsed={collapsed} />
+          
           <BaseDropdown
             collapsed={collapsed}
             title={t('settings')}
@@ -180,7 +180,7 @@ function NavItem({ item, collapsed }: NavItemProps) {
   const Icon = item.icon
   const { t, i18n } = useTranslation()
   const isRtl = i18n.language === 'ar'
-  const translatedLabel = t(item.label.toLowerCase())
+  const translatedLabel = t(item.label) !== item.label ? t(item.label) : t(item.label.toLowerCase())
 
   const navLink = (
     <NavLink

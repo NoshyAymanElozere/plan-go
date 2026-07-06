@@ -80,9 +80,11 @@ export function ImageUpload({
             <div
               onClick={triggerFileInput}
               className={cn(
-                'relative flex flex-col items-center justify-center border-2 rounded-2xl overflow-hidden transition-all duration-200 bg-gray-50/50',
+                'relative flex flex-col items-center justify-center rounded-2xl overflow-hidden transition-all duration-200',
                 aspectRatio,
-                disabled ? 'border-gray-200 bg-gray-50 cursor-default' : 'border-dashed border-gray-300 hover:border-main hover:bg-gray-50 cursor-pointer',
+                disabled 
+                  ? 'border border-gray-150 bg-gray-50/30 cursor-default' 
+                  : 'border-2 border-dashed border-gray-300 hover:border-main hover:bg-gray-50/50 cursor-pointer bg-gray-50/30',
                 error && 'border-rose-500'
               )}
             >
@@ -100,7 +102,7 @@ export function ImageUpload({
                   <img
                     src={preview}
                     alt="upload preview"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-102"
                   />
                   {!disabled && (
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center duration-200">
@@ -113,6 +115,13 @@ export function ImageUpload({
                       </button>
                     </div>
                   )}
+                </div>
+              ) : disabled ? (
+                <div className="flex flex-col items-center justify-center p-4 text-center text-gray-400">
+                  <ImageIcon className="h-6 w-6 mb-1.5 opacity-40 text-gray-400" />
+                  <span className="text-xs font-semibold text-gray-400">
+                    {t('noImage') || 'No image available'}
+                  </span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center p-4 text-center">

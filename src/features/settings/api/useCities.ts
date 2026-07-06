@@ -35,6 +35,16 @@ export function useCitiesList(page = 1, countryId?: number | string, search = ''
   })
 }
 
+export function useAllCities() {
+  return useQuery({
+    queryKey: ['all-cities'],
+    queryFn: async () => {
+      const response = await api.get('/admin/cities?per_page=1000')
+      return response.data.data.data as City[]
+    }
+  })
+}
+
 export function useCity(id: number | null) {
   return useQuery({
     queryKey: ['city', id],
