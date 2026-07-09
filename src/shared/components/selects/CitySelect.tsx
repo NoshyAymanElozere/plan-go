@@ -9,6 +9,7 @@ interface CitySelectProps<T extends FieldValues> {
   disabled?: boolean
   required?: boolean
   label?: string
+  countryId?: string | number
 }
 
 export function CitySelect<T extends FieldValues>({
@@ -16,12 +17,18 @@ export function CitySelect<T extends FieldValues>({
   control,
   disabled,
   required = true,
-  label
+  label,
+  countryId
 }: CitySelectProps<T>) {
   const { i18n, t } = useTranslation()
   const { data: cities = [] } = useAllCities()
 
-  const options = cities.map((c: any) => {
+  let filteredCities = cities
+  if (countryId) {
+    filteredCities = cities.filter((c: any) => String(c.country_id) === String(countryId))
+  }
+
+  const options = filteredCities.map((c: any) => {
     const nameVal = c.translations?.find((trans: any) => trans.language_id === (i18n.language === 'ar' ? 2 : 1))?.name || c.name || ''
     return { value: String(c.id), label: nameVal }
   })

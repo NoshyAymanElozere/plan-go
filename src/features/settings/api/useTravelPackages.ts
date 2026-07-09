@@ -32,11 +32,13 @@ export interface TravelPackage {
     id: number
     file_path: string
   }>
-  attractions?: Array<{
+  tourist_program?: {
     id: number
+    tourist_destination_id: number
+    price: string | number
     name: string
-    price: number
-  }>
+  }
+  tourist_program_id?: number
   ground_handling_services?: Array<{
     id: number
     name: string

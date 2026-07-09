@@ -7,9 +7,12 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ca
 import { Button } from '@/shared/components/button'
 import { BaseInputField } from '@/shared/components/base-input-field'
 import { BaseTextAreaField } from '@/shared/components/base-textarea-field'
+import { CountrySelect } from '@/shared/components/selects/CountrySelect'
+import { CitySelect } from '@/shared/components/selects/CitySelect'
 import { TouristDestinationSelect } from '@/shared/components/selects/TouristDestinationSelect'
-import { TouristAttractionSelect } from '@/shared/components/selects/TouristAttractionSelect'
+import { TouristProgramSelect } from '@/shared/components/selects/TouristProgramSelect'
 import { GroundServiceSelect } from '@/shared/components/selects/GroundServiceSelect'
+import { TripTypeSelect } from '@/shared/components/selects/TripTypeSelect'
 import { useTravelPackage } from '../../api/useTravelPackages'
 import { schema, getInitialValues } from './validationSchema'
 import { ArrowLeft, Edit3, DollarSign, ImageIcon } from 'lucide-react'
@@ -35,10 +38,9 @@ export default function TravelPackageDetailsPage() {
       const initial = getInitialValues(travelPackage)
       reset(initial)
       
-      const attractionIds = travelPackage.attractions?.map((a: any) => String(a.id)) || []
       const groundServiceIds = travelPackage.ground_handling_services?.map((g: any) => String(g.id)) || []
-      setValue('attractions', attractionIds)
-      setValue('ground_handling_services', groundServiceIds)
+      setValue('tourist_program_id', travelPackage.tourist_program?.id ? String(travelPackage.tourist_program.id) : '')
+      setValue('ground_handling_service_ids', groundServiceIds)
     }
   }, [travelPackage, reset, setValue])
 
@@ -136,16 +138,50 @@ export default function TravelPackageDetailsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <BaseInputField name="start_date" type="date" label={t('startDate') || 'Start Date'} disabled />
             <BaseInputField name="end_date" type="date" label={t('endDate') || 'End Date'} disabled />
-            <BaseInputField name="duration" label={t('duration') || 'Duration'} disabled />
+            <div className="w-full space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+                {t('durationDays') || 'Number of Days'}
+              </label>
+              <input
+                type="text"
+                value={travelPackage?.duration_days ?? ''}
+                className="w-full h-10 px-3.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 cursor-not-allowed"
+                disabled
+                readOnly
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="w-full space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+                {t('duration') || 'Duration'}
+              </label>
+              <input
+                type="text"
+                value={travelPackage?.duration || ''}
+                className="w-full h-10 px-3.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-600 cursor-not-allowed"
+                disabled
+                readOnly
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        
             <BaseInputField name="number_of_individuals" type="number" label={t('numberOfIndividuals') || 'Number of Individuals'} disabled />
-            
+            <CountrySelect control={control} disabled />
+            <CitySelect control={control} disabled />
+
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
             <TouristDestinationSelect
               control={control}
               disabled
             />
+
+            <TripTypeSelect control={control} disabled />
 
             <div className="flex flex-col gap-1.5 justify-center items-start">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
@@ -167,9 +203,39 @@ export default function TravelPackageDetailsPage() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div className="flex flex-col gap-1.5 justify-center items-start w-full">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+                {t('packageClassification') || 'تصنيف الباقة'}
+              </label>
+              <div className="flex items-center gap-6 h-10">
+                <label className="flex items-center gap-2 cursor-not-allowed text-sm font-medium text-gray-700">
+                  <input
+                    type="radio"
+                    disabled
+                    checked={!travelPackage?.is_special}
+                    readOnly
+                    className="h-4 w-4 text-main border-gray-300 focus:ring-main cursor-not-allowed"
+                  />
+                  <span>{t('standardPackage') || 'الباقات'}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-not-allowed text-sm font-medium text-gray-700">
+                  <input
+                    type="radio"
+                    disabled
+                    checked={!!travelPackage?.is_special}
+                    readOnly
+                    className="h-4 w-4 text-main border-gray-300 focus:ring-main cursor-not-allowed"
+                  />
+                  <span>{t('featuredPackage') || 'الباقات المميزة'}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           {/* Attractions and Ground Services */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <TouristAttractionSelect
+            <TouristProgramSelect
               control={control}
               touristDestinationId={selectedDestinationId}
               disabled
@@ -177,6 +243,7 @@ export default function TravelPackageDetailsPage() {
 
             <GroundServiceSelect
               control={control}
+              name="ground_handling_service_ids"
               disabled
             />
           </div>
@@ -203,14 +270,19 @@ export default function TravelPackageDetailsPage() {
                 </div>
               </div>
 
-              {/* Custom Override Price Input */}
-              <div>
-                <BaseInputField
-                  name="custom_price"
-                  type="number"
-                  label={t('customPrice') || 'Custom Override Price'}
-                  disabled
-                />
+              {/* Custom Override Price */}
+              <div className="p-4 rounded-xl bg-white border border-gray-150 flex items-center justify-between shadow-sm">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    {t('customPrice') || 'Custom Override Price'}
+                  </p>
+                  <p className="text-xl font-bold text-gray-800 mt-1" dir="ltr">
+                    {travelPackage?.custom_price ? `${Number(travelPackage.custom_price).toFixed(2)} USD` : '-'}
+                  </p>
+                </div>
+                <div className="h-10 w-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400">
+                  <DollarSign className="h-5 w-5" />
+                </div>
               </div>
 
               {/* Final Calculated Price */}
@@ -221,7 +293,7 @@ export default function TravelPackageDetailsPage() {
                       {t('finalPrice') || 'Final Price to Show'}
                     </p>
                     {travelPackage?.is_custom_price_used && (
-                      <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-semibold tracking-wide">
                         {t('overrideActive') || 'Override Active'}
                       </span>
                     )}

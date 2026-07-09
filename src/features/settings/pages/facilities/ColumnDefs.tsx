@@ -51,8 +51,7 @@ export function getFacilitiesColumnDefs({
         return (
           <StatusDropdown
             value={item.is_active}
-            onChange={() => toggleMutation.mutate(item.id)}
-            disabled={toggleMutation.isPending}
+            onChange={() => toggleMutation.mutateAsync(item.id)}
           />
         )
       }

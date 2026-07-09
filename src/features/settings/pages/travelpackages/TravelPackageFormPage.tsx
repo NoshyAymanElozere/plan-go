@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useForm, FormProvider, Controller } from 'react-hook-form'
+import { useForm, FormProvider, Controller, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslation } from 'react-i18next'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/card'
@@ -9,18 +9,29 @@ import { BaseInputField } from '@/shared/components/base-input-field'
 import { BaseTextAreaField } from '@/shared/components/base-textarea-field'
 import { ImageUpload } from '@/shared/components/image-upload'
 import { StatusDropdown } from '@/shared/components/StatusDropdown'
+import { CountrySelect } from '@/shared/components/selects/CountrySelect'
+import { CitySelect } from '@/shared/components/selects/CitySelect'
 import { TouristDestinationSelect } from '@/shared/components/selects/TouristDestinationSelect'
-import { TouristAttractionSelect } from '@/shared/components/selects/TouristAttractionSelect'
+import { TouristProgramSelect } from '@/shared/components/selects/TouristProgramSelect'
 import { GroundServiceSelect } from '@/shared/components/selects/GroundServiceSelect'
-import { useAllTouristAttractions } from '../../api/useTouristAttractions'
+import { TripTypeSelect } from '@/shared/components/selects/TripTypeSelect'
 import { useAllGroundServices } from '../../api/useGroundServices'
 import {
   useTravelPackage,
   useCreateTravelPackage,
   useUpdateTravelPackage
 } from '../../api/useTravelPackages'
+import { useAllTouristPrograms } from '../../api/useTouristPrograms'
 import { schema, getInitialValues } from './validationSchema'
-import { ArrowLeft, Plus, X, DollarSign } from 'lucide-react'
+import { ArrowLeft, Plus, X, DollarSign, CalendarDays, ArrowUp, ArrowDown, Trash2 } from 'lucide-react'
+import ModalStatus from '@/shared/components/modal-status'
+
+const urlToFile = async (url: string): Promise<File> => {
+  const response = await fetch(url)
+  const blob = await response.blob()
+  const filename = url.substring(url.lastIndexOf('/') + 1) || 'image.jpg'
+  return new File([blob], filename, { type: blob.type })
+}
 
 export default function TravelPackageFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -44,23 +55,57 @@ export default function TravelPackageFormPage() {
   const galleryInputRef = useRef<HTMLInputElement>(null)
 
   // Watch fields for pricing & attraction logic
+  const selectedCountryId = watch('country_id')
+  const selectedCityId = watch('city_id')
   const selectedDestinationId = watch('tourist_destination_id')
-  const selectedAttractionIds = watch('attractions') || []
-  const selectedGroundServiceIds = watch('ground_handling_services') || []
+  const selectedProgramId = watch('tourist_program_id')
+  const selectedGroundServiceIds = watch('ground_handling_service_ids') || []
   const customPriceValue = watch('custom_price')
 
-  // Fetch relevant attractions and ground services (still needed for dynamic client-side calculations)
-  const { data: attractions = [] } = useAllTouristAttractions(selectedDestinationId)
+  // Fetch relevant programs and ground services
+  const { data: programs = [] } = useAllTouristPrograms()
   const { data: groundServices = [] } = useAllGroundServices()
 
-  // Reset attractions when destination changes (except on first load of edit mode)
-  const isFirstLoadRef = useRef(true)
+  // Reset city, destination, program, ground services, and custom price when country changes
+  const lastCountryIdRef = useRef<string | null>(null)
   useEffect(() => {
-    if (isFirstLoadRef.current) {
-      isFirstLoadRef.current = false
-      return
+    if (lastCountryIdRef.current !== null && lastCountryIdRef.current !== selectedCountryId) {
+      setValue('city_id', '')
+      setValue('tourist_destination_id', '')
+      setValue('tourist_program_id', '')
+      setValue('ground_handling_service_ids', [])
+      setValue('custom_price', '')
     }
-    setValue('attractions', [])
+    if (selectedCountryId) {
+      lastCountryIdRef.current = selectedCountryId
+    }
+  }, [selectedCountryId, setValue])
+
+  // Reset destination, program, ground services, and custom price when city changes
+  const lastCityIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (lastCityIdRef.current !== null && lastCityIdRef.current !== selectedCityId) {
+      setValue('tourist_destination_id', '')
+      setValue('tourist_program_id', '')
+      setValue('ground_handling_service_ids', [])
+      setValue('custom_price', '')
+    }
+    if (selectedCityId) {
+      lastCityIdRef.current = selectedCityId
+    }
+  }, [selectedCityId, setValue])
+
+  // Reset tourist program, ground services, and custom price when destination changes (except on initial load of edit mode)
+  const lastDestinationIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (lastDestinationIdRef.current !== null && lastDestinationIdRef.current !== selectedDestinationId) {
+      setValue('tourist_program_id', '')
+      setValue('ground_handling_service_ids', [])
+      setValue('custom_price', '')
+    }
+    if (selectedDestinationId) {
+      lastDestinationIdRef.current = selectedDestinationId
+    }
   }, [selectedDestinationId, setValue])
 
   // Handle Edit initial load
@@ -69,12 +114,6 @@ export default function TravelPackageFormPage() {
       const initial = getInitialValues(travelPackage)
       reset(initial)
       setGalleryItems(initial.gallery || [])
-
-      // Manually set attractions and ground services ids
-      const attractionIds = travelPackage.attractions?.map((a: any) => String(a.id)) || []
-      const groundServiceIds = travelPackage.ground_handling_services?.map((g: any) => String(g.id)) || []
-      setValue('attractions', attractionIds)
-      setValue('ground_handling_services', groundServiceIds)
     } else if (!isEdit) {
       reset(getInitialValues(null))
       setGalleryItems([])
@@ -84,12 +123,12 @@ export default function TravelPackageFormPage() {
   // Dynamic pricing calculation
   const calculatedBasePrice = (() => {
     let sum = 0
-    selectedAttractionIds.forEach((attId: string) => {
-      const item = attractions.find((a: any) => String(a.id) === attId)
-      if (item) sum += Number(item.price || 0)
-    })
+    const chosenProgram = programs.find((p: any) => String(p.id) === String(selectedProgramId))
+    if (chosenProgram) {
+      sum += Number(chosenProgram.price || 0)
+    }
     selectedGroundServiceIds.forEach((gsId: string) => {
-      const item = groundServices.find((g: any) => String(g.id) === gsId)
+      const item = groundServices.find((g: any) => String(g.id) === String(gsId))
       if (item) sum += Number(item.price || 0)
     })
     return sum
@@ -117,14 +156,17 @@ export default function TravelPackageFormPage() {
     setValue('gallery', updated.map(item => item.file || item))
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = async (formData: any) => {
     const dataToSend = new FormData()
     dataToSend.append('tourist_destination_id', String(formData.tourist_destination_id))
     dataToSend.append('start_date', formData.start_date)
     dataToSend.append('end_date', formData.end_date)
-    dataToSend.append('duration', formData.duration)
     dataToSend.append('number_of_individuals', String(formData.number_of_individuals))
     dataToSend.append('is_active', formData.is_active ? '1' : '0')
+    dataToSend.append('tourist_program_id', String(formData.tourist_program_id))
+    dataToSend.append('trip_type_id', String(formData.trip_type_id))
+    dataToSend.append('is_special', formData.is_special ? '1' : '0')
+    dataToSend.append('duration', String(formData.duration_days))
 
     if (formData.custom_price) {
       dataToSend.append('custom_price', formData.custom_price)
@@ -138,16 +180,9 @@ export default function TravelPackageFormPage() {
     dataToSend.append('translations[1][name]', formData.nameAr)
     dataToSend.append('translations[1][description]', formData.descAr)
 
-    // Append collections arrays
-    if (Array.isArray(formData.attractions)) {
-      formData.attractions.forEach((attId: string) => {
-        dataToSend.append('attractions[]', attId)
-      })
-    }
-
-    if (Array.isArray(formData.ground_handling_services)) {
-      formData.ground_handling_services.forEach((gsId: string) => {
-        dataToSend.append('ground_handling_services[]', gsId)
+    if (Array.isArray(formData.ground_handling_service_ids)) {
+      formData.ground_handling_service_ids.forEach((gsId: string) => {
+        dataToSend.append('ground_handling_service_ids[]', gsId)
       })
     }
 
@@ -157,12 +192,33 @@ export default function TravelPackageFormPage() {
       dataToSend.append('image', formData.image)
     }
 
-    if (Array.isArray(formData.gallery)) {
-      formData.gallery.forEach((g: any) => {
-        if (g instanceof File) {
-          dataToSend.append('gallery[]', g)
+    // Gallery modification logic
+    const initialIds = travelPackage?.gallery?.map((g: any) => g.id) || []
+    const currentIds = galleryItems
+      .map((g: any) => g.id)
+      .filter((id) => typeof id === 'number' && Number.isInteger(id))
+
+    // Check if gallery has changes
+    const hasGalleryChanges =
+      initialIds.length !== currentIds.length ||
+      !initialIds.every((id: any) => currentIds.includes(id)) ||
+      galleryItems.some((item) => item.file instanceof File)
+
+    if (hasGalleryChanges) {
+      // Send new uploads
+      galleryItems.forEach((item) => {
+        if (item.file instanceof File) {
+          dataToSend.append('gallery[]', item.file)
         }
       })
+      // Send keep IDs
+      if (currentIds.length > 0) {
+        currentIds.forEach((id) => {
+          dataToSend.append('keep_gallery_ids[]', String(id))
+        })
+      } else {
+        dataToSend.append('keep_gallery_ids[]', '')
+      }
     }
 
     if (isEdit) {
@@ -301,11 +357,25 @@ export default function TravelPackageFormPage() {
                 <BaseInputField name="number_of_individuals" type="number" label={`${t('numberOfIndividuals') || 'Number of Individuals'} *`} required />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                <TouristDestinationSelect
-                  control={control}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <BaseInputField
+                  name="duration_days"
+                  type="number"
+                  label={`${t('durationDays') || 'Number of Days'} *`}
+                  required
+                  placeholder={t('durationDays') || 'e.g. 6'}
                 />
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <CountrySelect control={control} />
+                <CitySelect control={control} countryId={selectedCountryId} />
+                <TouristDestinationSelect control={control} cityId={selectedCityId} />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <TripTypeSelect control={control} />
+                
                 <div className="flex flex-col gap-1.5 justify-center items-start">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
                     {t('status') || 'Status'}
@@ -322,6 +392,40 @@ export default function TravelPackageFormPage() {
                     )}
                   />
                 </div>
+
+                <div className="flex flex-col gap-1.5 justify-center items-start w-full">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
+                    {t('packageClassification') || 'تصنيف الباقة'}
+                  </label>
+                  <Controller
+                    name="is_special"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="flex items-center gap-6 h-10">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
+                          <input
+                            type="radio"
+                            name="is_special"
+                            checked={field.value === false}
+                            onChange={() => field.onChange(false)}
+                            className="h-4 w-4 text-main border-gray-300 focus:ring-main"
+                          />
+                          <span>{t('standardPackage') || 'الباقات'}</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
+                          <input
+                            type="radio"
+                            name="is_special"
+                            checked={field.value === true}
+                            onChange={() => field.onChange(true)}
+                            className="h-4 w-4 text-main border-gray-300 focus:ring-main"
+                          />
+                          <span>{t('featuredPackage') || 'الباقات المميزة'}</span>
+                        </label>
+                      </div>
+                    )}
+                  />
+                </div>
               </div>
             </div>
 
@@ -332,13 +436,14 @@ export default function TravelPackageFormPage() {
                 {t('packageItems') || 'Package Items'}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TouristAttractionSelect
+                <TouristProgramSelect
                   control={control}
                   touristDestinationId={selectedDestinationId}
                 />
 
                 <GroundServiceSelect
                   control={control}
+                  name="ground_handling_service_ids"
                 />
               </div>
             </div>
@@ -378,7 +483,7 @@ export default function TravelPackageFormPage() {
                       {t('finalPrice') || 'Final Price'}
                     </p>
                     {customPriceValue && (
-                      <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-semibold tracking-wide">
                         {t('overrideActive') || 'Override Active'}
                       </span>
                     )}

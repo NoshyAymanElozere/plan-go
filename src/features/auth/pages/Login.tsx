@@ -76,15 +76,6 @@ export default function Login() {
               />
             </div>
 
-            {/* Forgot Password Link */}
-            <div className={isRtl ? 'text-right' : 'text-left'}>
-              <a href="#" className="text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
-                {isRtl ? 'نسيت كلمة المرور؟ ' : 'Forgot password? '}
-                <span className="text-[#7266F0] underline">
-                  {isRtl ? 'اعادة تعيين' : 'Reset'}
-                </span>
-              </a>
-            </div>
 
             {/* Submit Button */}
             <Button
@@ -95,16 +86,7 @@ export default function Login() {
               {isPending ? (isRtl ? 'جاري التحميل...' : 'Loading...') : t('login')}
             </Button>
 
-            {/* Signup Link */}
-            <div className="text-center pt-2">
-              <span className="text-xs font-semibold text-gray-400">
-                {isRtl ? 'ليس لديك حساب ؟ ' : "Don't have an account? "}
-                <a href="#" className="text-[#7266F0] hover:underline font-bold mr-1">
-                  {isRtl ? 'انشاء حساب' : 'Sign up'}
-                </a>
-              </span>
-            </div>
-
+          
           </form>
         </FormProvider>
       </div>

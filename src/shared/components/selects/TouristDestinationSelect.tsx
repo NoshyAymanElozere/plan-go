@@ -9,6 +9,7 @@ interface TouristDestinationSelectProps<T extends FieldValues> {
   disabled?: boolean
   required?: boolean
   label?: string
+  cityId?: string | number
 }
 
 export function TouristDestinationSelect<T extends FieldValues>({
@@ -16,12 +17,18 @@ export function TouristDestinationSelect<T extends FieldValues>({
   control,
   disabled,
   required = true,
-  label
+  label,
+  cityId
 }: TouristDestinationSelectProps<T>) {
   const { i18n, t } = useTranslation()
   const { data: destinations = [] } = useAllTouristDestinations()
 
-  const options = destinations.map((d: any) => {
+  let filteredDestinations = destinations
+  if (cityId) {
+    filteredDestinations = destinations.filter((d: any) => String(d.city_id) === String(cityId))
+  }
+
+  const options = filteredDestinations.map((d: any) => {
     const nameVal = d.translations?.find((trans: any) => trans.language_id === (i18n.language === 'ar' ? 2 : 1))?.name || d.name || ''
     return { value: String(d.id), label: nameVal }
   })

@@ -25,6 +25,17 @@ export function useTripTypesList(page = 1, search = '') {
   })
 }
 
+export function useAllTripTypes() {
+  return useQuery({
+    queryKey: ['all-triptypes'],
+    queryFn: async () => {
+      const response = await api.get('/admin/trip-types?per_page=1000')
+      return response.data.data.data as TripType[]
+    }
+  })
+}
+
+
 export function useCreateTripType() {
   const qc = useQueryClient()
   return useMutation({

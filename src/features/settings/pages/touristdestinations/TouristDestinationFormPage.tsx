@@ -9,6 +9,7 @@ import { BaseInputField } from '@/shared/components/base-input-field'
 import { BaseTextAreaField } from '@/shared/components/base-textarea-field'
 import { StatusDropdown } from '@/shared/components/StatusDropdown'
 import { ImageUpload } from '@/shared/components/image-upload'
+import { CountrySelect } from '@/shared/components/selects/CountrySelect'
 import { CitySelect } from '@/shared/components/selects/CitySelect'
 import {
   useTouristDestination,
@@ -17,6 +18,13 @@ import {
 } from '../../api/useTouristDestinations'
 import { schema, getInitialValues } from './validationSchema'
 import { ArrowLeft, Plus, X } from 'lucide-react'
+
+const urlToFile = async (url: string): Promise<File> => {
+  const response = await fetch(url)
+  const blob = await response.blob()
+  const filename = url.substring(url.lastIndexOf('/') + 1) || 'image.jpg'
+  return new File([blob], filename, { type: blob.type })
+}
 
 export default function TouristDestinationFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -35,6 +43,19 @@ export default function TouristDestinationFormPage() {
   })
 
   const { control, handleSubmit, reset, setValue, watch } = methods
+
+  const selectedCountryId = watch('country_id')
+
+  // Reset city when country changes (except on initial load of edit mode)
+  const lastCountryIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (lastCountryIdRef.current !== null && lastCountryIdRef.current !== selectedCountryId) {
+      setValue('city_id', '')
+    }
+    if (selectedCountryId) {
+      lastCountryIdRef.current = selectedCountryId
+    }
+  }, [selectedCountryId, setValue])
 
   const [galleryItems, setGalleryItems] = useState<any[]>([])
   const galleryInputRef = useRef<HTMLInputElement>(null)
@@ -73,7 +94,7 @@ export default function TouristDestinationFormPage() {
     setValue('gallery', updated.map(item => item.file || item))
   }
 
-  const onSubmit = (formData: any) => {
+  const onSubmit = async (formData: any) => {
     const dataToSend = new FormData()
     dataToSend.append('city_id', String(formData.city_id))
     dataToSend.append('is_active', formData.is_active ? '1' : '0')
@@ -92,12 +113,33 @@ export default function TouristDestinationFormPage() {
       dataToSend.append('image', formData.image)
     }
 
-    if (Array.isArray(formData.gallery)) {
-      formData.gallery.forEach((g: any) => {
-        if (g instanceof File) {
-          dataToSend.append('gallery[]', g)
+    // Gallery modification logic
+    const initialIds = destination?.gallery?.map((g: any) => g.id) || []
+    const currentIds = galleryItems
+      .map((g: any) => g.id)
+      .filter((id) => typeof id === 'number' && Number.isInteger(id))
+
+    // Check if gallery has changes
+    const hasGalleryChanges =
+      initialIds.length !== currentIds.length ||
+      !initialIds.every((id: any) => currentIds.includes(id)) ||
+      galleryItems.some((item) => item.file instanceof File)
+
+    if (hasGalleryChanges) {
+      // Send new uploads
+      galleryItems.forEach((item) => {
+        if (item.file instanceof File) {
+          dataToSend.append('gallery[]', item.file)
         }
       })
+      // Send keep IDs
+      if (currentIds.length > 0) {
+        currentIds.forEach((id) => {
+          dataToSend.append('keep_gallery_ids[]', String(id))
+        })
+      } else {
+        dataToSend.append('keep_gallery_ids[]', '')
+      }
     }
 
     if (isEdit) {
@@ -207,12 +249,9 @@ export default function TouristDestinationFormPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-              <div>
-                <CitySelect
-                  control={control}
-                />
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              <CountrySelect control={control} />
+              <CitySelect control={control} countryId={selectedCountryId} />
 
               <div className="flex flex-col gap-1.5 justify-center items-start">
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">

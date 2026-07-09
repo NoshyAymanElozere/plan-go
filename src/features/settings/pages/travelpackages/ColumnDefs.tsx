@@ -55,6 +55,34 @@ export function getTravelPackagesColumnDefs({
       flex: 1
     },
     {
+      headerName: t('country') || 'Country',
+      valueGetter: (params) => {
+        const country = params.data?.tourist_destination?.city?.country
+        if (!country) return '-'
+        return (
+          country.translations?.find((trans: any) => trans.language_id === (i18n.language === 'ar' ? 2 : 1))?.name ||
+          country.name ||
+          '-'
+        )
+      },
+      filter: false,
+      flex: 1
+    },
+    {
+      headerName: t('touristDestination') || 'Tourist City',
+      valueGetter: (params) => {
+        const dest = params.data?.tourist_destination
+        if (!dest) return '-'
+        return (
+          dest.translations?.find((trans: any) => trans.language_id === (i18n.language === 'ar' ? 2 : 1))?.name ||
+          dest.name ||
+          '-'
+        )
+      },
+      filter: false,
+      flex: 1
+    },
+    {
       headerName: t('finalPrice') || 'Final Price',
       filter: false,
       width: 150,
@@ -65,8 +93,8 @@ export function getTravelPackagesColumnDefs({
           <div className="flex items-center gap-1.5 h-full">
             <span className="font-semibold text-foreground">{data.final_price}</span>
             {data.is_custom_price_used && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-bold">
-                <Info className="h-3 w-3" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-semibold tracking-wide">
+                <Info className="h-2.5 w-2.5" />
                 {t('overrideActive') || 'Override'}
               </span>
             )}
@@ -94,8 +122,7 @@ export function getTravelPackagesColumnDefs({
         return (
           <StatusDropdown
             value={item.is_active}
-            onChange={() => toggleMutation.mutate(item.id)}
-            disabled={toggleMutation.isPending}
+            onChange={() => toggleMutation.mutateAsync(item.id)}
           />
         )
       }

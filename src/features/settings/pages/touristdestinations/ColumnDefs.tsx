@@ -55,6 +55,20 @@ export function getTouristDestinationsColumnDefs({
       flex: 1
     },
     {
+      headerName: t('country') || 'Country',
+      valueGetter: (params) => {
+        const country = params.data?.city?.country
+        if (!country) return '-'
+        return (
+          country.translations?.find((trans: any) => trans.language_id === (i18n.language === 'ar' ? 2 : 1))?.name ||
+          country.name ||
+          '-'
+        )
+      },
+      filter: false,
+      flex: 1
+    },
+    {
       headerName: t('city') || 'City',
       valueGetter: (params) => {
         const city = params.data?.city
@@ -82,8 +96,7 @@ export function getTouristDestinationsColumnDefs({
         return (
           <StatusDropdown
             value={item.is_active}
-            onChange={() => toggleMutation.mutate(item.id)}
-            disabled={toggleMutation.isPending}
+            onChange={() => toggleMutation.mutateAsync(item.id)}
           />
         )
       }

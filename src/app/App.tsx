@@ -27,12 +27,14 @@ import FooterPage from '@/features/settings/pages/footer/FooterPage'
 import TouristDestinationsPage from '@/features/settings/pages/touristdestinations/TouristDestinationsPage'
 import TouristDestinationFormPage from '@/features/settings/pages/touristdestinations/TouristDestinationFormPage'
 import TouristDestinationDetailsPage from '@/features/settings/pages/touristdestinations/TouristDestinationDetailsPage'
-import TouristAttractionsPage from '@/features/settings/pages/touristattractions/TouristAttractionsPage'
-import TouristAttractionFormPage from '@/features/settings/pages/touristattractions/TouristAttractionFormPage'
-import TouristAttractionDetailsPage from '@/features/settings/pages/touristattractions/TouristAttractionDetailsPage'
+
 import TravelPackagesPage from '@/features/settings/pages/travelpackages/TravelPackagesPage'
 import TravelPackageFormPage from '@/features/settings/pages/travelpackages/TravelPackageFormPage'
 import TravelPackageDetailsPage from '@/features/settings/pages/travelpackages/TravelPackageDetailsPage'
+import TouristProgramsPage from '@/features/settings/pages/touristprograms/TouristProgramsPage'
+import TouristProgramFormPage from '@/features/settings/pages/touristprograms/TouristProgramFormPage'
+import TouristProgramDetailsPage from '@/features/settings/pages/touristprograms/TouristProgramDetailsPage'
+import GlobalSettingsPage from '@/features/settings/pages/globalsettings/GlobalSettingsPage'
 
 import { ProtectedRoute, PublicRoute } from '@/shared/components/RouteGuards'
 
@@ -62,7 +64,11 @@ function App() {
             <Route path="settings" element={<Settings />}>
               <Route index element={<Navigate to="countries" replace />} />
               <Route path="countries" element={<CountriesPage />} />
-              <Route path="cities" element={<CitiesPage />} />
+               <Route path="cities" element={<CitiesPage />} />
+              <Route path="touristprograms" element={<TouristProgramsPage />} />
+              <Route path="touristprograms/new" element={<TouristProgramFormPage />} />
+              <Route path="touristprograms/:id" element={<TouristProgramDetailsPage />} />
+              <Route path="touristprograms/:id/edit" element={<TouristProgramFormPage />} />
               <Route path="triptypes" element={<TripTypesPage />} />
               <Route path="travelertypes" element={<TravelerTypesPage />} />
               <Route path="hotelcategories" element={<HotelCategoriesPage />} />
@@ -78,15 +84,13 @@ function App() {
               <Route path="touristdestinations/new" element={<TouristDestinationFormPage />} />
               <Route path="touristdestinations/:id" element={<TouristDestinationDetailsPage />} />
               <Route path="touristdestinations/:id/edit" element={<TouristDestinationFormPage />} />
-              <Route path="touristattractions" element={<TouristAttractionsPage />} />
-              <Route path="touristattractions/new" element={<TouristAttractionFormPage />} />
-              <Route path="touristattractions/:id" element={<TouristAttractionDetailsPage />} />
-              <Route path="touristattractions/:id/edit" element={<TouristAttractionFormPage />} />
+
               <Route path="travelpackages" element={<TravelPackagesPage />} />
               <Route path="travelpackages/new" element={<TravelPackageFormPage />} />
               <Route path="travelpackages/:id" element={<TravelPackageDetailsPage />} />
               <Route path="travelpackages/:id/edit" element={<TravelPackageFormPage />} />
               <Route path="footer" element={<FooterPage />} />
+              <Route path="globalsettings" element={<GlobalSettingsPage />} />
             </Route>
             {/* end setting routes */}
             <Route path="help" element={<Help />} />

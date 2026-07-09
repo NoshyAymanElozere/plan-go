@@ -30,7 +30,7 @@ export const BaseInputField = React.forwardRef<HTMLInputElement, BaseInputFieldP
     React.useImperativeHandle(ref, () => localRef.current as HTMLInputElement)
 
     const isRtl = document.documentElement.dir === 'rtl'
-    const inputDir = props.dir || (isRtl ? 'rtl' : 'ltr')
+    const inputDir = props.dir || (type === 'number' ? 'ltr' : (isRtl ? 'rtl' : 'ltr'))
     const isInputRtl = inputDir === 'rtl'
     const isPassword = type === 'password'
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type
@@ -130,6 +130,7 @@ export const BaseInputField = React.forwardRef<HTMLInputElement, BaseInputFieldP
           <input
             ref={localRef}
             type={inputType}
+            dir={inputDir}
             placeholder={placeholder}
             className={cn(
               'w-full h-10 px-3.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-main focus:border-main transition-all [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:transition-opacity',
@@ -140,6 +141,11 @@ export const BaseInputField = React.forwardRef<HTMLInputElement, BaseInputFieldP
               props.readOnly && 'bg-gray-50/50 border-gray-200/50 text-gray-700 cursor-default focus:ring-0 focus:border-gray-200/50',
               className
             )}
+            style={{
+              fontVariantNumeric: 'lining-nums tabular-nums',
+              fontFeatureSettings: '"lnum" on, "tnum" on',
+              ...props.style
+            }}
             {...registerProps}
             {...props}
           />

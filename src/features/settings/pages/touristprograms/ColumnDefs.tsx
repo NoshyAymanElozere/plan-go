@@ -1,25 +1,23 @@
 import { Button } from '@/shared/components/button'
-import { StatusDropdown } from '@/shared/components/StatusDropdown'
 import { ColDef } from 'ag-grid-community'
 import { Pencil, Trash2, Eye } from 'lucide-react'
 
 interface ColumnDefsProps {
   t: (key: string) => string
-  toggleMutation: any
-  setEditingItem: (item: any) => void
-  setIsModalOpen: (open: boolean) => void
+  i18n: any
   setDeletingItem: (item: any) => void
-  setIsViewOnly: (view: boolean) => void
+  navigate: (path: string) => void
 }
 
-export function getRatingsColumnDefs({
+export function getTouristProgramColumnDefs({
   t,
-  toggleMutation,
-  setEditingItem,
-  setIsModalOpen,
+  i18n,
   setDeletingItem,
-  setIsViewOnly
+  navigate
 }: ColumnDefsProps): ColDef[] {
+  const isRtl = i18n?.language === 'ar'
+  const langId = isRtl ? 2 : 1
+
   return [
     {
       headerName: t('arabicName') || 'Arabic Name',
@@ -38,23 +36,53 @@ export function getRatingsColumnDefs({
       flex: 1
     },
     {
-      headerName: t('status') || 'Status',
-      field: 'is_active',
-      filter: 'agSetColumnFilter',
-      filterParams: {
-        valueFormatter: (params: any) => (params.value ? t('active') || 'Active' : t('inactive') || 'Inactive')
-      },
-      width: 150,
-      cellRenderer: (params: any) => {
-        const item = params.data
-        if (!item) return null
+      headerName: t('country') || 'Country',
+      valueGetter: (params) => {
+        const country = params.data?.tourist_destination?.city?.country
+        if (!country) return '-'
         return (
-          <StatusDropdown
-            value={item.is_active}
-            onChange={() => toggleMutation.mutateAsync(item.id)}
-          />
+          country.translations?.find((trans: any) => trans.language_id === langId)?.name ||
+          country.name ||
+          '-'
         )
-      }
+      },
+      filter: false,
+      flex: 1
+    },
+    {
+      headerName: t('city') || 'City',
+      valueGetter: (params) => {
+        const city = params.data?.tourist_destination?.city
+        if (!city) return '-'
+        return (
+          city.translations?.find((trans: any) => trans.language_id === langId)?.name ||
+          city.name ||
+          '-'
+        )
+      },
+      filter: false,
+      flex: 1
+    },
+    {
+      headerName: t('touristDestination') || 'Tourist City',
+      valueGetter: (params) => {
+        const dest = params.data?.tourist_destination
+        if (!dest) return '-'
+        return (
+          dest.translations?.find((trans: any) => trans.language_id === langId)?.name ||
+          dest.name ||
+          '-'
+        )
+      },
+      filter: false,
+      flex: 1
+    },
+    {
+      headerName: t('price') || 'Price',
+      field: 'price',
+      filter: false,
+      width: 120,
+      valueFormatter: (params) => `${Number(params.value || 0).toFixed(2)} USD`
     },
     {
       headerName: t('actions') || 'Actions',
@@ -69,22 +97,14 @@ export function getRatingsColumnDefs({
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={() => {
-                setEditingItem(item)
-                setIsViewOnly(true)
-                setIsModalOpen(true)
-              }}
+              onClick={() => navigate(`/settings/touristprograms/${item.id}`)}
             >
               <Eye className="h-4 w-4 text-blue-500" />
             </Button>
             <Button
               variant="ghost"
               size="icon-sm"
-              onClick={() => {
-                setEditingItem(item)
-                setIsViewOnly(false)
-                setIsModalOpen(true)
-              }}
+              onClick={() => navigate(`/settings/touristprograms/${item.id}/edit`)}
             >
               <Pencil className="h-4 w-4 text-gray-500" />
             </Button>

@@ -12,5 +12,6 @@ export const settingLinks = [
     { value: 'privacypolicy', label: 'privacyPolicy' },
     { value: 'termsconditions', label: 'termsConditions' },
     { value: 'support', label: 'support' },
-    { value: 'footer', label: 'footer' }
+    { value: 'footer', label: 'footer' },
+    { value: 'globalsettings', label: 'globalSettings' }
 ]

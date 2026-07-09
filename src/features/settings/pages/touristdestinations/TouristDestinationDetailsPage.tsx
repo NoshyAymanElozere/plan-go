@@ -5,8 +5,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ca
 import { Button } from '@/shared/components/button'
 import { GenericDataGrid } from '@/shared/components/GenericDataGrid'
 import { useTouristDestination } from '../../api/useTouristDestinations'
-import { useTouristAttractionsList } from '../../api/useTouristAttractions'
-import { getAttractionsColumnDefs } from './AttractionsColumnDefs'
+import { useTouristProgramsList } from '../../api/useTouristPrograms'
+import { getProgramsColumnDefs } from './ProgramsColumnDefs'
 import { ArrowLeft, Edit3, MapPin, Eye, ImageIcon } from 'lucide-react'
 
 export default function TouristDestinationDetailsPage() {
@@ -15,11 +15,11 @@ export default function TouristDestinationDetailsPage() {
   const { t, i18n } = useTranslation()
   const isRtl = i18n.language === 'ar'
 
-  const [attractionsPage, setAttractionsPage] = useState(1)
+  const [programsPage, setProgramsPage] = useState(1)
   const { data: destination, isLoading } = useTouristDestination(id ? Number(id) : null)
-  const { data: attractionsData, isLoading: attractionsLoading } = useTouristAttractionsList(attractionsPage, id || undefined)
+  const { data: programsData, isLoading: programsLoading } = useTouristProgramsList(programsPage, '', id)
 
-  const columnDefs = getAttractionsColumnDefs({ t })
+  const columnDefs = getProgramsColumnDefs({ t })
 
   if (isLoading) {
     return (
@@ -40,6 +40,7 @@ export default function TouristDestinationDetailsPage() {
   const name = destination.translations?.find((t: any) => t.language_id === (isRtl ? 2 : 1))?.name || destination.name || ''
   const description = destination.translations?.find((t: any) => t.language_id === (isRtl ? 2 : 1))?.description || destination.description || ''
   const cityName = destination.city?.translations?.find((t: any) => t.language_id === (isRtl ? 2 : 1))?.name || destination.city?.name || ''
+  const countryName = destination.city?.country?.translations?.find((t: any) => t.language_id === (isRtl ? 2 : 1))?.name || destination.city?.country?.name || ''
 
   return (
     <div className="space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -109,7 +110,15 @@ export default function TouristDestinationDetailsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6 flex-1">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('country') || 'Country'}</span>
+                <div className="flex items-center gap-2 text-foreground font-semibold">
+                  <MapPin className="h-4 w-4 text-main" />
+                  <span>{countryName}</span>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t('city') || 'City'}</span>
                 <div className="flex items-center gap-2 text-foreground font-semibold">
@@ -140,26 +149,26 @@ export default function TouristDestinationDetailsPage() {
         </Card>
       </div>
 
-      {/* Tourist Attractions Table */}
+      {/* Tourist Programs Table */}
       <Card className="border-slate-200/80 shadow-sm rounded-2xl bg-slate-50/90 overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between pb-4 border-b border-border/40 px-6 py-5">
           <CardTitle className="text-md font-bold text-gray-700">
-            {t('touristAttractions') || 'Tourist Attractions'}
+            {t('touristPrograms') || 'Tourist Programs'}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <GenericDataGrid
-            rowData={attractionsData?.data || []}
+            rowData={programsData?.data || []}
             columnDefs={columnDefs}
             rowHeight={50}
             headerHeight={50}
-            loading={attractionsLoading}
+            loading={programsLoading}
             isServerSide
-            currentPage={attractionsPage}
-            totalPages={attractionsData?.meta?.last_page || attractionsData?.last_page || 1}
-            onPageChange={setAttractionsPage}
-            paginationLinks={attractionsData?.meta?.links || attractionsData?.links}
-            onViewRow={(data) => navigate(`/settings/touristattractions/${data.id}`)}
+            currentPage={programsPage}
+            totalPages={programsData?.meta?.last_page || programsData?.last_page || 1}
+            onPageChange={setProgramsPage}
+            paginationLinks={programsData?.meta?.links || programsData?.links}
+            onViewRow={(data) => navigate(`/settings/touristprograms/${data.id}`)}
           />
         </CardContent>
       </Card>

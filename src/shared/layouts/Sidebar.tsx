@@ -19,7 +19,8 @@ import {
   Users,
   Briefcase,
   Map,
-  MapPin
+  MapPin,
+  Calendar
 } from 'lucide-react'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -120,7 +121,7 @@ export function Sidebar({ collapsed, onCollapse }: SidebarProps) {
         )}
         <ul className="space-y-1 px-2">
           <NavItem item={{ label: 'touristDestinations', href: '/settings/touristdestinations', icon: Map }} collapsed={collapsed} />
-          <NavItem item={{ label: 'touristAttractions', href: '/settings/touristattractions', icon: MapPin }} collapsed={collapsed} />
+          <NavItem item={{ label: 'touristPrograms', href: '/settings/touristprograms', icon: Calendar }} collapsed={collapsed} />
           <NavItem item={{ label: 'travelPackages', href: '/settings/travelpackages', icon: Briefcase }} collapsed={collapsed} />
           
           <BaseDropdown
